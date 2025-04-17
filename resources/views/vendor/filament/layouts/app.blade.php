@@ -1,0 +1,1 @@
+<img src="{{ asset('path/to/your/icon.png') }}" alt="Your Icon" />
