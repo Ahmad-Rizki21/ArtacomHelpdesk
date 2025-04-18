@@ -3,9 +3,11 @@
 namespace App\Filament\Resources\TicketBackboneResource\Pages;
 
 use App\Filament\Resources\TicketBackboneResource;
+use App\Models\TicketBackboneAction;
 use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Notifications\Notification;
+use Illuminate\Support\Facades\Auth;
 
 class CreateTicketBackbone extends CreateRecord
 {
@@ -16,8 +18,17 @@ class CreateTicketBackbone extends CreateRecord
         return $this->getResource()::getUrl('index');
     }
 
-
-    
+    protected function afterCreate(): void
+    {
+        // Create Open Clock action
+        TicketBackboneAction::create([
+            'ticket_backbone_id' => $this->record->id,
+            'user_id' => Auth::id(),
+            'action_type' => 'Open Clock',
+            'description' => 'Ticket baru dibuat',
+            'status' => 'OPEN'
+        ]);
+    }
 
     protected function getCreatedNotification(): ?Notification
     {
@@ -27,7 +38,4 @@ class CreateTicketBackbone extends CreateRecord
             ->title('Berhasil menambahkan tiket')
             ->body('Ticket berhasil di buat, Terimakasih.');
     }
-
 }
-
-

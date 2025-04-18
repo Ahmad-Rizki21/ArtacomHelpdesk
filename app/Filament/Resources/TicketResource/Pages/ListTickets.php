@@ -10,6 +10,8 @@ use Maatwebsite\Excel\Facades\Excel;
 use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Builder;
 use App\Models\Ticket;
+use Filament\Support\Enums\IconPosition;
+use Filament\Resources\Components\Tab;
 
 class ListTickets extends ListRecords
 {
@@ -17,18 +19,59 @@ class ListTickets extends ListRecords
 
     public bool $hasActiveFilters = false;
 
+    // Default tab untuk halaman
+    public function getDefaultActiveTab(): ?string
+    {
+        return 'Active';
+    }
+
+    public function getTabs(): array
+    {
+        return [
+            'Active' => Tab::make('Tiket Aktif')
+                ->badge(fn () => Ticket::whereIn('status', ['OPEN', 'PENDING'])->count())
+                ->icon('heroicon-o-bell-alert')
+                ->modifyQueryUsing(fn (Builder $query) => $query->whereIn('status', ['OPEN', 'PENDING'])),
+                
+            'Open' => Tab::make('Tiket Terbuka')
+                ->badge(fn () => Ticket::where('status', 'OPEN')->count())
+                ->badgeColor('danger')
+                ->icon('heroicon-o-exclamation-circle')
+                ->modifyQueryUsing(fn (Builder $query) => $query->where('status', 'OPEN')),
+                
+            'Pending' => Tab::make('Tiket Pending')
+                ->badge(fn () => Ticket::where('status', 'PENDING')->count())
+                ->badgeColor('warning')
+                ->icon('heroicon-o-clock')
+                ->modifyQueryUsing(fn (Builder $query) => $query->where('status', 'PENDING')),
+                
+            'Closed' => Tab::make('Tiket Selesai')
+                ->badge(fn () => Ticket::where('status', 'CLOSED')->count())
+                ->badgeColor('success')
+                ->icon('heroicon-o-check-circle')
+                ->modifyQueryUsing(fn (Builder $query) => $query->where('status', 'CLOSED')),
+                
+            'All' => Tab::make('Semua Tiket')
+                ->badge(fn () => Ticket::count())
+                ->icon('heroicon-o-ticket'),
+        ];
+    }
+
     protected function getHeaderActions(): array
     {
         return [
             Action::make('create')
                 ->label('Buat Tiket')
                 ->url(static::getResource()::getUrl('create'))
-                ->icon('heroicon-o-plus'),
+                ->icon('heroicon-o-plus')
+                ->iconPosition(IconPosition::Before)
+                ->color('primary'),
                 
             Action::make('export')
-                ->label(fn () => $this->hasActiveFilters ? 'Ekspor Data' : 'Ekspor Semua Data')
+                ->label(fn () => $this->hasActiveFilters ? 'Ekspor Data Terfilter' : 'Ekspor Semua Data')
                 ->color('success')
                 ->icon('heroicon-o-arrow-down-tray')
+                ->iconPosition(IconPosition::Before)
                 ->action(function () {
                     return $this->hasActiveFilters 
                         ? $this->exportFilteredData() 
@@ -135,7 +178,8 @@ class ListTickets extends ListRecords
      */
     protected function getFilteredQuery(): Builder
     {
-        $query = $this->getTableQuery();
+        // Gunakan $this->getTable()->getQuery() sebagai pengganti getTableQuery() yang deprecated
+        $query = $this->getTable()->getQuery();
 
         // Terapkan filter tambahan jika ada
         
@@ -169,5 +213,62 @@ class ListTickets extends ListRecords
         }
         
         return $query;
+    }
+
+    protected function getTableFiltersFormColumns(): int
+    {
+        return 3; // Tampilkan 3 kolom filter untuk layout yang lebih rapi
+    }
+
+    protected function getTableFiltersFormWidth(): string
+    {
+        return '4xl'; // Perlebar form filter untuk tampilan yang lebih baik
+    }
+
+    // Kustomisasi tampilan kosong saat tidak ada data
+    protected function getTableEmptyStateIcon(): ?string
+    {
+        return 'heroicon-o-ticket';
+    }
+
+    protected function getTableEmptyStateHeading(): ?string
+    {
+        $activeTab = $this->getActiveTab();
+        
+        if ($activeTab === 'Open') {
+            return 'Tidak ada tiket terbuka';
+        } elseif ($activeTab === 'Pending') {
+            return 'Tidak ada tiket pending';
+        } elseif ($activeTab === 'Closed') {
+            return 'Tidak ada tiket yang selesai';
+        } else {
+            return 'Tidak ada tiket ditemukan';
+        }
+    }
+
+    protected function getTableEmptyStateDescription(): ?string
+    {
+        $activeTab = $this->getActiveTab();
+        
+        if ($activeTab === 'Open') {
+            return 'Semua tiket sudah ditangani dengan baik.';
+        } elseif ($activeTab === 'Pending') {
+            return 'Tidak ada tiket yang sedang pending saat ini.';
+        } elseif ($activeTab === 'Closed') {
+            return 'Belum ada tiket yang diselesaikan.';
+        } else {
+            return 'Tiket tidak ditemukan. Silakan coba filter lain atau buat tiket baru.';
+        }
+    }
+
+    protected function getTableEmptyStateActions(): array
+    {
+        return [
+            Action::make('create')
+                ->label('Buat Tiket Baru')
+                ->url(static::getResource()::getUrl('create'))
+                ->icon('heroicon-o-plus')
+                ->button(),
+        ];
     }
 }

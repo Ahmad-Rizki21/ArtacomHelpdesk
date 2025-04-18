@@ -47,21 +47,7 @@ class Ticket extends Model
                 $model->created_by = Auth::id();
             }
         });
-
-
     }
-
-
-    protected static function booted()
-    {
-        static::updating(function ($ticket) {
-            if ($ticket->isDirty('status') && $ticket->status === 'CLOSED') {
-                // Tandai tiket untuk dihapus (soft delete) ketika status berubah menjadi CLOSED
-                $ticket->deleted_at = now();
-            }
-        });
-    }
-
 
     /**
      * Relasi ke model Customer
@@ -87,10 +73,24 @@ class Ticket extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
+    /**
+     * Relasi ke model TicketAction
+     */
     public function actions()
-{
-    return $this->hasMany(\App\Models\TicketAction::class, 'ticket_id')->orderByDesc('created_at');
-}
+    {
+        return $this->hasMany(\App\Models\TicketAction::class, 'ticket_id')->orderByDesc('created_at');
+    }
+
+
+    public function getProgressPercentageAttribute(): int  
+    {  
+        return match ($this->status) {  
+            'OPEN' => 10,  
+            'PENDING' => 50,  
+            'CLOSED' => 100,  
+            default => 0,  
+        };  
+    }  
 
 
 

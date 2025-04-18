@@ -4,15 +4,16 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use App\Models\BackboneCID;
 
-
 class TicketBackbone extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'no_ticket',
@@ -20,13 +21,14 @@ class TicketBackbone extends Model
         'jenis_isp',
         'lokasi_id',
         'extra_description',
+        'action_description', // Add this line
         'status',
         'open_date',
         'pending_date',
         'closed_date',
         'created_by',
+        'action_description', // Add action_description for resolutions
     ];
-
 
     protected $casts = [
         'open_date' => 'datetime',
@@ -34,14 +36,13 @@ class TicketBackbone extends Model
         'closed_date' => 'datetime',
     ];
 
-
-
-
     protected static function boot()
     {
         parent::boot();
+        
         static::creating(function ($ticket) {
             $ticket->no_ticket = 'BackBone-' . str_pad(mt_rand(1, 99999), 5, '0', STR_PAD_LEFT);
+            $ticket->open_date = now(); // Ensure open_date is set
         });
 
         static::creating(function ($ticket) {
@@ -59,24 +60,24 @@ class TicketBackbone extends Model
                 $ticket->closed_date = now();
             }
         });
-
     }
 
+    // Relationship to TicketBackboneAction
+    public function actions(): HasMany
+    {
+        return $this->hasMany(TicketBackboneAction::class, 'ticket_backbone_id');
+    }
 
-
-
-     // Format Pending Date
-     public function getPendingDateFormattedAttribute()
-     {
-         return $this->pending_date ? Carbon::parse($this->pending_date)->format('d/m/Y H:i') : 'Belum ada Pending';
-     }
+    // Format Pending Date
+    public function getPendingDateFormattedAttribute()
+    {
+        return $this->pending_date ? Carbon::parse($this->pending_date)->format('d/m/Y H:i') : 'Belum ada Pending';
+    }
      
-     public function getClosedDateFormattedAttribute()
-     {
-         return $this->closed_date ? Carbon::parse($this->closed_date)->format('d/m/Y H:i') : 'Belum ada Ticket Closed';
-     }
-     
-
+    public function getClosedDateFormattedAttribute()
+    {
+        return $this->closed_date ? Carbon::parse($this->closed_date)->format('d/m/Y H:i') : 'Belum ada Ticket Closed';
+    }
 
     // Relasi ke BackboneCID (Pastikan 'cid' cocok dengan tipe data di BackboneCID)
     public function cidRelation()
@@ -101,30 +102,12 @@ class TicketBackbone extends Model
     }
 
     public function getExtraDescriptionAttribute($value)
-{
-    return $value ?: 'Belum Ada Deskripsi Tambahan';
-}
-
-  
+    {
+        return $value ?: 'Belum Ada Deskripsi Tambahan';
+    }
 
     public static function lokasiList()
-{
-    return BackboneCid::pluck('lokasi', 'id')->toArray();
-}
-
-
-// public function dashboard()
-// {
-//     $openTickets = Ticket::where('status', 'OPEN')->count();
-//     $pendingTickets = Ticket::where('status', 'PENDING')->count();
-//     $closedTickets = Ticket::where('status', 'CLOSED')->count();
-
-//     // Hitung jumlah tiket backbone
-//     $openBackboneTickets = TicketBackbone::where('status', 'OPEN')->count();
-//     $pendingBackboneTickets = TicketBackbone::where('status', 'PENDING')->count();
-//     $closedBackboneTickets = TicketBackbone::where('status', 'CLOSED')->count();
-
-//     return view('filament.pages.dashboard', compact('openTickets', 'pendingTickets', 'closedTickets', 'openBackboneTickets', 'pendingBackboneTickets', 'closedBackboneTickets'));
-// }
-
+    {
+        return BackboneCid::pluck('lokasi', 'id')->toArray();
+    }
 }

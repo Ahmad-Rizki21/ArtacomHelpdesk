@@ -2,66 +2,56 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-// use Spatie\Permission\Traits\HasRoles;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Permission\Traits\HasRoles;
-
 use Spatie\Activitylog\LogOptions;
 
 class User extends Authenticatable
 {
+    use HasFactory, Notifiable, HasRoles, LogsActivity;
+
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logOnly(['name', 'email']);
+            ->logOnly(['name', 'email'])
+            ->setDescriptionForEvent(fn(string $eventName) => "User has been {$eventName}")
+            ->logOnlyDirty();
     }
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
 
-    use HasRoles;
-
-    use LogsActivity;
-
-    protected static $logAttributes = ['name', 'email']; // Log perubahan pada atribut ini
-
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
     protected $fillable = [
         'name',
         'email',
         'password',
-        'role', // Tambahkan ini
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
-    
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
-            'role' => 'string', // Tambahkan ini
         ];
+    }
+
+    public function isSuperAdmin(): bool
+    {
+        return $this->hasRole('super_admin');
+    }
+
+    public function tickets()
+    {
+        return $this->hasMany(Ticket::class, 'created_by');
+    }
+
+    public function actions()
+    {
+        return $this->hasMany(TicketAction::class);
     }
 }

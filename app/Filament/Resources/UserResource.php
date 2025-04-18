@@ -20,7 +20,7 @@ class UserResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-user-plus';
     protected static ?string $navigationLabel = 'Users';
-    protected static ?string $navigationGroup = 'Systems';
+    protected static ?string $navigationGroup = 'Settings';
 
     public static function form(Form $form): Form
     {
@@ -39,16 +39,6 @@ class UserResource extends Resource
                     ->label('Password')
                     ->dehydrateStateUsing(fn ($state) => bcrypt($state))
                     ->dehydrated(fn ($state) => filled($state)),
-                    Forms\Components\Select::make('role')
-                    ->required()
-                    ->label('Role')
-                    ->options([
-                        'Admin' => 'Admin',
-                        'Helpdesk' => 'Helpdesk',
-                        
-                    ])
-                    ->default('helpdesk') // Set default role
-                     ->searchable(), // Tambahkan pencarian jika opsi banyak
                     
             ]);
     }
@@ -60,16 +50,15 @@ class UserResource extends Resource
                 TextColumn::make('id')->label('ID')->sortable(),
                 TextColumn::make('name')->label('Nama')->sortable()->searchable(),
                 TextColumn::make('email')->label('Email')->sortable()->searchable(),
-                TextColumn::make('role')->label('Role')->sortable()->searchable(),
                 TextColumn::make('created_at')->label('Dibuat Pada')->dateTime(),
             ])
             ->filters([
                 //
             ])
             ->actions([
-                // Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make(),
                 Tables\Actions\ViewAction::make(),
-                // Tables\Actions\DeleteAction::make(),
+                Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\DeleteBulkAction::make(),

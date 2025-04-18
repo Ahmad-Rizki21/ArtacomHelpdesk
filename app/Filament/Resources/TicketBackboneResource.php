@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\TicketBackboneResource\Pages;
 use App\Models\TicketBackbone;
+use App\Models\TicketBackboneAction;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Forms\Components\DateTimePicker;
@@ -49,7 +50,7 @@ class TicketBackboneResource extends Resource
                 ->searchable()
                 ->options(fn () => BackboneCID::pluck('cid', 'id')->toArray())
                 ->required()
-                ->live() // Tambahkan live untuk trigger perubahan di `jenis_isp`
+                ->live()
                 ->afterStateUpdated(fn ($state, $set) => $set('jenis_isp', BackboneCID::where('id', $state)->value('jenis_isp'))),
 
             Select::make('lokasi_id')
@@ -58,10 +59,10 @@ class TicketBackboneResource extends Resource
                 ->options(fn () => BackboneCID::pluck('lokasi', 'id')->toArray())
                 ->required(),
 
-                Hidden::make('created_by')
-            ->default(fn () => Filament::auth()->user()->id), // Mengambil ID user yang sedang login
+            Hidden::make('created_by')
+                ->default(fn () => Filament::auth()->user()->id),
 
-                Select::make('jenis_isp')
+            Select::make('jenis_isp')
                 ->label('Jenis Layanan ISP')
                 ->searchable()
                 ->options([
@@ -72,25 +73,26 @@ class TicketBackboneResource extends Resource
                 ])
                 ->default(fn ($get) => BackboneCID::where('id', $get('cid'))->value('jenis_isp') ?? 'Tidak Diketahui')
                 ->required()
-                ->disabled(), // Supaya tidak bisa diubah manual
+                ->disabled(),
 
-                // Forms\Components\Textarea::make('extra_description')
-                // ->label('Extra Description')
-                // ->placeholder('Masukkan deskripsi tambahan di sini...')
-                // ->rows(4)
-                // ->default(fn ($get) => $get('status') === 'OPEN' ? 'Belum Ada Deskripsi Tambahan' : null)
-                // ->disabled(fn ($get) => $get('status') !== 'PENDING')
-                // ->required(),
                 Forms\Components\Textarea::make('extra_description')
                 ->label('Extra Description')
                 ->placeholder('Masukkan deskripsi tambahan di sini...')
                 ->rows(4)
-                ->default(null) // Default kosong, bukan "Belum Ada Deskripsi Tambahan"
-                ->disabled(fn ($get) => $get('status') === 'OPEN') // Disable saat OPEN
+                ->default(null)
+                ->helperText(fn ($get) => $get('status') === 'OPEN' 
+                    ? 'Anda sedang mengedit deskripsi tiket yang masih OPEN.' 
+                    : 'Tambahkan informasi detail untuk tiket ini.')
                 ->live(),
 
-
-                
+            // Action Description for resolutions - like in Ticket system
+            Forms\Components\Textarea::make('action_description')
+                ->label('Resolution / Action')
+                ->placeholder('Jelaskan tindakan yang dilakukan untuk menyelesaikan tiket ini...')
+                ->helperText('Field ini wajib diisi saat ticket CLOSED. Isi otomatis dari Progress terbaru atau isi secara manual.')
+                ->rows(4)
+                ->required(fn ($get) => $get('status') === 'CLOSED')
+                ->visible(fn ($get) => $get('status') === 'CLOSED'),
 
             Select::make('status')
                 ->label('Status')
@@ -124,37 +126,34 @@ class TicketBackboneResource extends Resource
                 ->label('Closed Date')
                 ->disabled()
                 ->dehydrated(),
-
         ]);
     }
 
     public static function table(Table $table): Table
     {
-
         $tickets = TicketBackbone::query()
-        ->with(['cidRelation', 'creator'])
-        ->get()
-        ->map(function ($ticket) {
-            return [
-                'no_ticket'   => $ticket->no_ticket,
-                'cid'         => optional($ticket->cidRelation)->cid ?? 'N/A',
-                'jenis_isp'   => $ticket->jenis_isp,
-                'lokasi'      => TicketBackbone::lokasiList()[$ticket->lokasi_id] ?? 'N/A',
-                'extra_description' => $ticket->extra_description,
-                'status'      => $ticket->status,
-                'open_date'   => $ticket->open_date?->format('d-m-Y H:i') ?? 'N/A',
-                'pending_date'=> $ticket->pending_date?->format('d-m-Y H:i') ?? 'Belum ada Pending',
-                'closed_date' => $ticket->closed_date?->format('d-m-Y H:i') ?? 'Belum ada Ticket Closed',
-                'created_by'  => optional($ticket->creator)->name ?? 'Unknown',
-                'created_at' => $ticket->created_at ?? null,  // Pastikan ada
-                'updated_at' => $ticket->updated_at ?? null,  // Pastikan ada
-            ];
-        });
+            ->with(['cidRelation', 'creator'])
+            ->get()
+            ->map(function ($ticket) {
+                return [
+                    'no_ticket'   => $ticket->no_ticket,
+                    'cid'         => optional($ticket->cidRelation)->cid ?? 'N/A',
+                    'jenis_isp'   => $ticket->jenis_isp,
+                    'lokasi'      => TicketBackbone::lokasiList()[$ticket->lokasi_id] ?? 'N/A',
+                    'extra_description' => $ticket->extra_description,
+                    'action_description' => $ticket->action_description,
+                    'status'      => $ticket->status,
+                    'open_date'   => $ticket->open_date?->format('d-m-Y H:i') ?? 'N/A',
+                    'pending_date'=> $ticket->pending_date?->format('d-m-Y H:i') ?? 'Belum ada Pending',
+                    'closed_date' => $ticket->closed_date?->format('d-m-Y H:i') ?? 'Belum ada Ticket Closed',
+                    'created_by'  => optional($ticket->creator)->name ?? 'Unknown',
+                    'created_at' => $ticket->created_at ?? null,
+                    'updated_at' => $ticket->updated_at ?? null,
+                ];
+            });
 
-    // Simpan data yang ditampilkan di Filament ke session untuk ekspor
-    session(['filtered_tickets' => $tickets]);
-
-
+        // Simpan data yang ditampilkan di Filament ke session untuk ekspor
+        session(['filtered_tickets' => $tickets]);
 
         return $table->columns([
             TextColumn::make('no_ticket')
@@ -167,7 +166,7 @@ class TicketBackboneResource extends Resource
                 ->sortable()
                 ->searchable(),
 
-                TextColumn::make('jenis_isp')
+            TextColumn::make('jenis_isp')
                 ->label('Jenis ISP')
                 ->sortable()
                 ->formatStateUsing(fn ($state) => $state ?: 'Tidak Diketahui'),
@@ -177,54 +176,49 @@ class TicketBackboneResource extends Resource
                 ->sortable()
                 ->searchable(),
 
-                Tables\Columns\TextColumn::make('extra_description')
-    ->label('Extra Description')
-    ->formatStateUsing(fn ($state) => $state && trim($state) !== '' ? $state : 'Belum Ada Deskripsi Tambahan')
-    ->limit(50)
-    ->sortable()
-    ->searchable(),
+            Tables\Columns\TextColumn::make('extra_description')
+                ->label('Extra Description')
+                ->formatStateUsing(fn ($state) => $state && trim($state) !== '' ? $state : 'Belum Ada Deskripsi Tambahan')
+                ->limit(50)
+                ->sortable()
+                ->searchable(),
 
-                TextColumn::make('status')
+            TextColumn::make('status')
                 ->badge()
                 ->sortable()
                 ->color(fn ($state) => match ($state) {
-                    'OPEN' => 'danger',   // Merah
-                    'PENDING' => 'warning', // Kuning/Orange
-                    'CLOSED' => 'success',  // Hijau
+                    'OPEN' => 'danger',
+                    'PENDING' => 'warning', 
+                    'CLOSED' => 'success',
                 }),
-            
 
             TextColumn::make('open_date')
                 ->label('Open Date')
                 ->dateTime('d/m/Y H:i')
                 ->sortable(),
 
-                TextColumn::make('pending_date_formatted')
+            TextColumn::make('pending_date_formatted')
                 ->label('Pending Date')
                 ->sortable(),
 
             TextColumn::make('closed_date_formatted')
-            ->label('Closed Date')
-            ->sortable(),
+                ->label('Closed Date')
+                ->sortable(),
 
             Tables\Columns\TextColumn::make('created_at')
-            ->label('Created At')
-            ->dateTime('Y-m-d H:i:s') // Format sesuai dengan database
-            ->sortable(),
+                ->label('Created At')
+                ->dateTime('Y-m-d H:i:s')
+                ->sortable(),
 
             Tables\Columns\TextColumn::make('updated_at')
                 ->label('Updated At')
                 ->dateTime('Y-m-d H:i:s')
                 ->sortable(),
 
-
-                TextColumn::make('creator.name')
+            TextColumn::make('creator.name')
                 ->label('Created By')
                 ->sortable()
                 ->searchable(),
-            
-            
-            
         ])
         ->filters([
             SelectFilter::make('status')
@@ -236,8 +230,8 @@ class TicketBackboneResource extends Resource
                 ]),
         ])
         ->actions([
-            EditAction::make(),
             ViewAction::make(),
+            EditAction::make(),
             DeleteAction::make()
                 ->label('Hapus')
                 ->icon('heroicon-o-trash')
@@ -256,14 +250,138 @@ class TicketBackboneResource extends Resource
                         ->send();
                 }),
             
-        
-            
-    ]);
-}
+            // Add action for updating resolution
+            Action::make('updateResolution')
+                ->label('Update Resolution')
+                ->icon('heroicon-o-document-text')
+                ->color('success')
+                ->form([
+                    Forms\Components\Textarea::make('action_description')
+                        ->label('Resolution / Action')
+                        ->required()
+                        ->placeholder('Jelaskan tindakan yang dilakukan')
+                        ->default(function ($record) {
+                            return $record->action_description;
+                        })
+                ])
+                ->action(function (TicketBackbone $record, array $data): void {
+                    // Update action_description pada ticket
+                    $record->update([
+                        'action_description' => $data['action_description']
+                    ]);
+                    
+                    // Jika status CLOSED, update action Completed terbaru
+                    if ($record->status === 'CLOSED') {
+                        $completedAction = $record->actions()
+                            ->where('action_type', 'Completed')
+                            ->latest('created_at')
+                            ->first();
+                            
+                        if ($completedAction) {
+                            $completedAction->update([
+                                'description' => $data['action_description']
+                            ]);
+                        } else {
+                            // Buat action Completed baru jika belum ada
+                            $record->actions()->create([
+                                'user_id' => Filament::auth()->user()->id,
+                                'action_type' => 'Completed',
+                                'description' => $data['action_description'],
+                                'status' => 'CLOSED'
+                            ]);
+                        }
+                    } else {
+                        // Tambahkan sebagai catatan jika ticket belum CLOSED
+                        $record->actions()->create([
+                            'user_id' => Filament::auth()->user()->id,
+                            'action_type' => 'Note',
+                            'description' => $data['action_description'],
+                            'status' => $record->status
+                        ]);
+                    }
+                    
+                    // Tampilkan notifikasi sukses
+                    Notification::make()
+                        ->title('Resolution telah diperbarui')
+                        ->success()
+                        ->send();
+                })
+                ->successNotificationTitle('Resolution telah diperbarui'),
+                
+            // Add progress action
+            Action::make('addProgress')
+                ->label('Tambah Progress')
+                ->icon('heroicon-o-plus-circle')
+                ->color('primary')
+                ->form([
+                    Forms\Components\Select::make('action_type')
+                        ->label('Tipe Aksi')
+                        ->options([
+                            'Open Clock' => 'Open Clock',
+                            'Pending Clock' => 'Pending Clock',
+                            'Start Clock' => 'Start Clock',
+                            'Completed' => 'Completed',
+                            'Note' => 'Catatan/Tindakan'
+                        ])
+                        ->required()
+                        ->live(),
+                    Forms\Components\Textarea::make('description')
+                        ->label('Deskripsi Tindakan')
+                        ->placeholder("C:\\Users\\USER>ping 8.8.8.8\nPinging 8.8.8.8 ...")
+                        ->rows(8)
+                        ->required()
+                        ->helperText(function (Forms\Get $get) {
+                            if ($get('action_type') === 'Completed') {
+                                return 'Deskripsi ini akan otomatis mengisi field Resolution/Action pada ticket';
+                            }
+                            return 'Bisa copy-paste hasil ping, akan tampil sesuai baris.';
+                        }),
+                ])
+                ->action(function (TicketBackbone $record, array $data): void {
+                    try {
+                        // Buat ticket action baru
+                        $ticketAction = TicketBackboneAction::create([
+                            'ticket_backbone_id' => $record->id,
+                            'user_id' => Filament::auth()->user()->id,
+                            'action_type' => $data['action_type'],
+                            'description' => $data['description'],
+                            'status' => $record->status
+                        ]);
 
+                        $updates = [];
+                        
+                        // Update ticket berdasarkan tipe tindakan
+                        if ($data['action_type'] === 'Pending Clock') {
+                            $updates['status'] = 'PENDING';
+                            $updates['pending_date'] = now();
+                        } elseif ($data['action_type'] === 'Completed') {
+                            $updates['status'] = 'CLOSED';
+                            $updates['closed_date'] = now();
+                            // Set action_description dengan deskripsi dari ticket action
+                            $updates['action_description'] = $data['description'];
+                        } elseif ($data['action_type'] === 'Start Clock' && $record->status === 'PENDING') {
+                            $updates['status'] = 'OPEN';
+                        }
+                        
+                        if (!empty($updates)) {
+                            $record->update($updates);
+                        }
 
-
-    
+                        Notification::make()
+                            ->success()
+                            ->title('Progress Berhasil Ditambahkan')
+                            ->send();
+                    } catch (\Exception $e) {
+                        Notification::make()
+                            ->danger()
+                            ->title('Gagal menambahkan progress')
+                            ->body($e->getMessage())
+                            ->send();
+                    }
+                })
+                ->visible(fn ($record) => $record->status !== 'CLOSED'),
+        ]);
+    }
 
     public static function getRelations(): array
     {
@@ -275,6 +393,7 @@ class TicketBackboneResource extends Resource
         return [
             'index' => Pages\ListTicketBackbones::route('/'),
             'create' => Pages\CreateTicketBackbone::route('/create'),
+            'view' => Pages\ViewTicketBackbone::route('/{record}'),
             'edit' => Pages\EditTicketBackbone::route('/{record}/edit'),
         ];
     }

@@ -10,6 +10,7 @@ use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use BezhanSalleh\FilamentShield\Facades\FilamentShield;
 use Filament\Widgets;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
@@ -26,8 +27,8 @@ use App\Filament\Widgets\BackboneTicketStatsWidget;
 use App\Filament\Widgets\TicketChartWidget;
 use App\Filament\Widgets\BackboneTicketChartWidget;
 use Devonab\FilamentEasyFooter\EasyFooterPlugin;
-
 use Leandrocfe\FilamentApexCharts\FilamentApexChartsPlugin;
+use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 
 use Filament\Navigation\NavigationGroup;
 use Filament\Navigation\NavigationItem;
@@ -49,60 +50,51 @@ class AdminPanelProvider extends PanelProvider
                 'gray' => Color::Slate,
             ])
             ->brandName('FTTH JELANTIK HELPDESK')
-            // ->brandLogo(asset('images/Capture-removebg-preview.png'))
-            // ->brandLogoHeight('60px')
-            ->darkMode(true) // Enable dark mode for better chart visibility
+            ->darkMode(true)
             
-            // Define navigation groups without icons
             ->navigationGroups([
-                NavigationGroup::make()
-                    ->label('Helpdesk'),
-                NavigationGroup::make()
-                    ->label('Backbone'),
-                NavigationGroup::make()
-                    ->label('Management'),
-                NavigationGroup::make()
-                    ->label('System'),
+                NavigationGroup::make()->label('Helpdesk'),
+                NavigationGroup::make()->label('Backbone'),
+                NavigationGroup::make()->label('Management'),
+                NavigationGroup::make()->label('System'),
             ])
             
-            // Register resources
             ->resources([
                 TicketResource::class,
             ])
             
-            // Discover custom pages and resources
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             
-            // Important: Use the correct base Dashboard class
             ->pages([
                 Pages\Dashboard::class,
             ])
             
-            // Register widgets - remove AccountWidget
             ->widgets([
                 TicketStatsWidget::class,
                 BackboneTicketStatsWidget::class,
                 TicketChartWidget::class,
                 BackboneTicketChartWidget::class,
-                // Removed Widgets\AccountWidget::class
             ])
             
-            // Register Filament Apex Charts plugin
+            // Consolidate plugin registration
             ->plugins([
                 FilamentApexChartsPlugin::make(),
                 EasyFooterPlugin::make()
-                ->withBorder()
-                ->withLogo(
-                    'https://ajnusa.com/images/artacom.png', // Path to logo
-                    'https://ajnusa.com/'                                // URL for logo link (optional)
-                )
-                ->withLinks([
-                    ['title' => 'Dev', 'url' => 'https://www.instagram.com/amad.dyk/'],
-                ])
-                ->withLoadTime('This page loaded in'),
+                    ->withBorder()
+                    ->withLogo(
+                        'https://ajnusa.com/images/artacom.png',
+                        'https://ajnusa.com/'
+                    )
+                    ->withLinks([
+                        ['title' => 'Dev', 'url' => 'https://www.instagram.com/amad.dyk/'],
+                    ])
+                    ->withLoadTime('This page loaded in'),
+                
+                // Move Filament Shield plugin here
+                FilamentShieldPlugin::make(),
             ])
             
-            // Middleware configuration
+            // Remove duplicate resources block
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,

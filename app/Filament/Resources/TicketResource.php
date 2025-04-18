@@ -15,12 +15,20 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Grid;
 use Closure;
+use IbrahimBougaoua\FilaProgress\Forms\Components\CircleProgressEntry;  
+use IbrahimBougaoua\FilaProgress\Forms\Components\ProgressBarEntry;   
+use IbrahimBougaoua\FilaProgress\Tables\Columns\CircleProgress;  
+use IbrahimBougaoua\FilaProgress\Tables\Columns\ProgressBar;  
+
 use Filament\Forms\Components\Select;
 use Filament\Tables\Filters\Filter;
 use Illuminate\Database\Eloquent\Builder;
 use Carbon\Carbon;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
+use Filament\Notifications\Notification;
+use Illuminate\Database\Eloquent\Collection;
+  
 
 
 class TicketResource extends Resource
@@ -29,6 +37,31 @@ class TicketResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-ticket';
     protected static ?string $navigationLabel = 'Tickets';
     protected static ?string $navigationGroup = 'Helpdesk';
+    protected static ?int $navigationSort = 1;
+    
+    // Tambahkan badge counter untuk tiket yang belum selesai (OPEN dan PENDING)
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::whereIn('status', ['OPEN', 'PENDING'])->count();
+    }
+    
+    // Tambahkan warna badge
+    public static function getNavigationBadgeColor(): ?string
+    {
+        $openTicketsCount = static::getModel()::where('status', 'OPEN')->count();
+        
+        if ($openTicketsCount > 0) {
+            return 'danger';
+        }
+        
+        $pendingTicketsCount = static::getModel()::where('status', 'PENDING')->count();
+        
+        if ($pendingTicketsCount > 0) {
+            return 'warning';
+        }
+        
+        return 'success';
+    }
 
     public static function form(Form $form): Form
     {
@@ -153,6 +186,7 @@ class TicketResource extends Resource
                             ->columnSpan(1),
                     ]),
                 ]),
+                
 
             Section::make('System Information')
                 ->description('Internal tracking details')
@@ -172,7 +206,34 @@ class TicketResource extends Resource
                     Forms\Components\Hidden::make('created_by')
                         ->default(fn () => Auth::user()->id)
                         ->disabled(),
+                ]),
+
+                Section::make('Progress Information')
+                ->description('Track ticket progress')
+                ->visible(fn (?Ticket $record) => $record !== null) // Only show when editing an existing ticket
+                ->schema([
+                    Forms\Components\Select::make('progress_status')
+                        ->label('Progress Status')
+                        ->options([
+                            '10' => 'Started',
+                            '25' => 'In Progress',
+                            '50' => 'Partially Complete',
+                            '75' => 'Nearly Complete',
+                            '100' => 'Completed'
+                        ])
+                        ->default('10')
+                        ->columnSpan(1),
+
+                    Forms\Components\TextInput::make('progress_percentage')
+                        ->label('Progress Percentage')
+                        ->numeric()
+                        ->minValue(0)
+                        ->maxValue(100)
+                        ->default(10)
+                        ->suffix('%')
+                        ->columnSpan(1)
                 ])
+                 
         ]);
     }
 
@@ -279,6 +340,21 @@ class TicketResource extends Resource
                         
                         return $state;
                     }),
+
+                                CircleProgress::make('Progress')  
+                            ->getStateUsing(fn ($record) => [  
+                                'total' => 100,  
+                                'progress' => $record->progress_percentage,  
+                            ])
+                            ->label('Progress'),  
+                
+                        ProgressBar::make('Progress Bar')  
+                            ->getStateUsing(fn ($record) => [  
+                                'total' => 100,  
+                                'progress' => $record->progress_percentage,  
+                            ])
+                            ->label('Progress Bar'),   
+            
                 
                 TextColumn::make('creator.name')
                     ->label('Created By')
@@ -397,6 +473,12 @@ class TicketResource extends Resource
                                 'status' => $record->status
                             ]);
                         }
+                        
+                        // Tampilkan notifikasi sukses
+                        Notification::make()
+                            ->title('Resolution telah diperbarui')
+                            ->success()
+                            ->send();
                     })
                     ->successNotificationTitle('Resolution telah diperbarui')
                     ->visible(fn (Ticket $record) => Auth::check() && Auth::user()->can('update', $record))
@@ -404,10 +486,70 @@ class TicketResource extends Resource
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
+                    
+                    // Tambahkan bulk action untuk mengubah status
+                    Tables\Actions\BulkAction::make('updateStatus')
+                        ->label('Update Status')
+                        ->icon('heroicon-o-arrow-path')
+                        ->form([
+                            Forms\Components\Select::make('status')
+                                ->label('New Status')
+                                ->options([
+                                    'OPEN' => 'OPEN',
+                                    'PENDING' => 'PENDING',
+                                    'CLOSED' => 'CLOSED',
+                                ])
+                                ->required(),
+                                
+                            Forms\Components\Textarea::make('action_description')
+                                ->label('Resolution / Action')
+                                ->required()
+                                ->placeholder('Jelaskan tindakan yang dilakukan')
+                                ->visible(fn (Get $get): bool => $get('status') === 'CLOSED'),
+                        ])
+                        ->action(function (Collection $records, array $data): void {
+                            foreach ($records as $record) {
+                                $oldStatus = $record->status;
+                                
+                                // Update data tiket
+                                $updateData = [
+                                    'status' => $data['status'],
+                                ];
+                                
+                                // Jika status CLOSED, tambahkan action_description dan closed_date
+                                if ($data['status'] === 'CLOSED') {
+                                    $updateData['action_description'] = $data['action_description'];
+                                    $updateData['closed_date'] = now();
+                                }
+                                
+                                $record->update($updateData);
+                                
+                                // Tambahkan action berdasarkan status
+                                if ($data['status'] === 'CLOSED') {
+                                    $record->actions()->create([
+                                        'user_id' => Auth::id(),
+                                        'action_type' => 'Completed',
+                                        'description' => $data['action_description'],
+                                        'status' => 'CLOSED'
+                                    ]);
+                                } else {
+                                    $record->actions()->create([
+                                        'user_id' => Auth::id(),
+                                        'action_type' => 'Status Change',
+                                        'description' => "Status changed from {$oldStatus} to {$data['status']}",
+                                        'status' => $data['status']
+                                    ]);
+                                }
+                            }
+                            
+                            Notification::make()
+                                ->title('Status tiket berhasil diperbarui')
+                                ->success()
+                                ->send();
+                        })
                 ]),
             ]);
     }
-
 
     public static function getRelations(): array
     {
