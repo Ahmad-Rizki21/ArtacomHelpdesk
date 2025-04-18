@@ -14,13 +14,11 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Grid;
-use Closure;
 use IbrahimBougaoua\FilaProgress\Forms\Components\CircleProgressEntry;  
 use IbrahimBougaoua\FilaProgress\Forms\Components\ProgressBarEntry;   
 use IbrahimBougaoua\FilaProgress\Tables\Columns\CircleProgress;  
 use IbrahimBougaoua\FilaProgress\Tables\Columns\ProgressBar;  
-
-use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Tables\Filters\Filter;
 use Illuminate\Database\Eloquent\Builder;
 use Carbon\Carbon;
@@ -28,8 +26,6 @@ use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Collection;
-  
-
 
 class TicketResource extends Resource
 {
@@ -39,13 +35,11 @@ class TicketResource extends Resource
     protected static ?string $navigationGroup = 'Helpdesk';
     protected static ?int $navigationSort = 1;
     
-    // Tambahkan badge counter untuk tiket yang belum selesai (OPEN dan PENDING)
     public static function getNavigationBadge(): ?string
     {
         return static::getModel()::whereIn('status', ['OPEN', 'PENDING'])->count();
     }
     
-    // Tambahkan warna badge
     public static function getNavigationBadgeColor(): ?string
     {
         $openTicketsCount = static::getModel()::where('status', 'OPEN')->count();
@@ -79,7 +73,7 @@ class TicketResource extends Resource
                             ->required()
                             ->columnSpan(1),
                         
-                            Forms\Components\TextInput::make('ticket_number')
+                        Forms\Components\TextInput::make('ticket_number')
                             ->label('Ticket Number')
                             ->disabled()
                             ->default(fn () => 'TFTTH-' . strtoupper(uniqid()))
@@ -129,7 +123,7 @@ class TicketResource extends Resource
                             ->disabled()
                             ->columnSpan(1),
                         
-                            Forms\Components\Select::make('status')
+                        Forms\Components\Select::make('status')
                             ->label('Status')
                             ->options([
                                 'OPEN' => 'OPEN',
@@ -142,12 +136,6 @@ class TicketResource extends Resource
                             ->afterStateUpdated(function (Get $get, Set $set, string $state) {
                                 if ($state === 'CLOSED') {
                                     $set('closed_date', now());
-                                    
-                                    // Jika action_description kosong, coba cari dari latest Completed action
-                                    if (empty($get('action_description'))) {
-                                        // Kita tidak bisa langsung mengakses action disini
-                                        // Logic ini hanya sebagai placeholder, implementasi sebenarnya ada di beforeSave
-                                    }
                                 } else {
                                     $set('closed_date', null);
                                 }
@@ -155,7 +143,41 @@ class TicketResource extends Resource
                             ->columnSpan(1),
                     ]),
 
-                    // Perbaikan untuk field action_description
+                    // Ubah Select menjadi TextInput untuk email
+                    // Forms\Components\Select::make('assigned_to')
+                    // ->label('Assign to Technician')
+                    // ->options(function () {
+                    //     // Ambil semua user dengan role TEKNISI
+                    //     return \App\Models\User::role('TEKNISI')
+                    //         ->pluck('email', 'email')
+                    //         ->toArray();
+                    // })
+                    // ->searchable()
+                    // ->required()
+                    // ->helperText('Pilih email teknisi yang akan menangani tiket ini')
+                    // ->live()
+                    // ->afterStateUpdated(function (Get $get, Set $set, ?string $state) {
+                    //     \Illuminate\Support\Facades\Log::info('Email teknisi diubah ke: ' . $state);
+                    // }),
+                    Forms\Components\Select::make('assigned_to')
+                    ->label('Assign to Technician')
+                    ->options(function () {
+                        // Ambil semua user dengan role TEKNISI dan format sebagai "Nama (Email)"
+                        return \App\Models\User::role('TEKNISI')
+                            ->get()
+                            ->mapWithKeys(function ($user) {
+                                return [$user->email => $user->name];
+                            })
+                            ->toArray();
+                    })
+                    ->searchable()
+                    ->required()
+                    ->helperText('Pilih teknisi yang akan menangani tiket ini')
+                    ->live()
+                    ->afterStateUpdated(function (Get $get, Set $set, ?string $state) {
+                        \Illuminate\Support\Facades\Log::info('Email teknisi diubah ke: ' . $state);
+                    }),
+
                     Forms\Components\Textarea::make('action_description')
                         ->label('Resolution / Action')
                         ->placeholder('Jika ingin melakukan Closed Ticket WAJIB mengisi Action nya...')
@@ -187,7 +209,6 @@ class TicketResource extends Resource
                     ]),
                 ]),
                 
-
             Section::make('System Information')
                 ->description('Internal tracking details')
                 ->schema([
@@ -210,7 +231,7 @@ class TicketResource extends Resource
 
                 Section::make('Progress Information')
                 ->description('Track ticket progress')
-                ->visible(fn (?Ticket $record) => $record !== null) // Only show when editing an existing ticket
+                ->visible(fn (?Ticket $record) => $record !== null)
                 ->schema([
                     Forms\Components\Select::make('progress_status')
                         ->label('Progress Status')
@@ -233,7 +254,6 @@ class TicketResource extends Resource
                         ->suffix('%')
                         ->columnSpan(1)
                 ])
-                 
         ]);
     }
 
@@ -303,7 +323,6 @@ class TicketResource extends Resource
                     ->placeholder('Belum ada Ticket Closed')
                     ->sortable(),
 
-                // Perbaikan tampilan kolom Resolution / Action
                 TextColumn::make('action_description')
                     ->label('Resolution / Action')
                     ->placeholder('Belum ada Penanganan')
@@ -315,19 +334,16 @@ class TicketResource extends Resource
                         }
                         return $state;
                     })
-                    // Tampilkan sebagai badge untuk konsistensi dengan UI
                     ->badge() 
-                    ->color('success') // Gunakan warna yang konsisten dengan tema
+                    ->color('success')
                     ->formatStateUsing(function ($state, $record) {
                         if (empty($state) && $record->status === 'CLOSED') {
-                            // Auto-fill dari latest completed action jika kosong
                             $completedAction = $record->actions()
                                 ->where('action_type', 'Completed')
                                 ->latest('created_at')
                                 ->first();
                                 
                             if ($completedAction) {
-                                // Update record agar tetap konsisten
                                 $record->update(['action_description' => $completedAction->description]);
                                 return $completedAction->description;
                             }
@@ -341,21 +357,41 @@ class TicketResource extends Resource
                         return $state;
                     }),
 
-                                CircleProgress::make('Progress')  
-                            ->getStateUsing(fn ($record) => [  
-                                'total' => 100,  
-                                'progress' => $record->progress_percentage,  
-                            ])
-                            ->label('Progress'),  
+                // Ubah kolom technician.name menjadi assigned_to
+                TextColumn::make('assigned_to')
+                ->label('Assigned To')
+                ->placeholder('Not Assigned')
+                ->formatStateUsing(function ($state) {
+                    if (empty($state)) {
+                        return 'Not Assigned';
+                    }
+                    
+                    $user = \App\Models\User::where('email', $state)->first();
+                    
+                    if ($user) {
+                        return $user->name;
+                    }
+                    
+                    return $state;
+                })
+                ->sortable()
+                ->searchable(),
+                    
+
+                CircleProgress::make('Progress')  
+                    ->getStateUsing(fn ($record) => [  
+                        'total' => 100,  
+                        'progress' => $record->progress_percentage,  
+                    ])
+                    ->label('Progress'),  
                 
-                        ProgressBar::make('Progress Bar')  
-                            ->getStateUsing(fn ($record) => [  
-                                'total' => 100,  
-                                'progress' => $record->progress_percentage,  
-                            ])
-                            ->label('Progress Bar'),   
+                ProgressBar::make('Progress Bar')  
+                    ->getStateUsing(fn ($record) => [  
+                        'total' => 100,  
+                        'progress' => $record->progress_percentage,  
+                    ])
+                    ->label('Progress Bar'),   
             
-                
                 TextColumn::make('creator.name')
                     ->label('Created By')
                     ->sortable()
@@ -373,14 +409,14 @@ class TicketResource extends Resource
                 Filter::make('created_at_period')
                     ->label('Filter by Period')
                     ->form([
-                        Select::make('year')
+                        Forms\Components\Select::make('year')
                             ->label('Year')
                             ->options(
                                 collect(range(2022, now()->year))
                                     ->reverse()
                                     ->mapWithKeys(fn ($year) => [$year => $year])
                             ),
-                        Select::make('month')
+                        Forms\Components\Select::make('month')
                             ->label('Month')
                             ->options([
                                 '01' => 'January',
@@ -403,7 +439,6 @@ class TicketResource extends Resource
                         ->when($data['month'], fn ($q) => $q->whereMonth('created_at', $data['month']))
                     ),
                 
-                // Filter untuk jenis masalah (problem summary)
                 SelectFilter::make('problem_summary')
                     ->label('Problem Type')
                     ->options([
@@ -424,7 +459,6 @@ class TicketResource extends Resource
                     ->modalHeading('Delete Ticket')
                     ->modalDescription('Are you sure you want to delete this ticket? This action cannot be undone.'),
                     
-                // Tambahkan action untuk update Resolution langsung dari daftar
                 Tables\Actions\Action::make('updateResolution')
                     ->label('Update Resolution')
                     ->icon('heroicon-o-document-text')
@@ -439,12 +473,10 @@ class TicketResource extends Resource
                             })
                     ])
                     ->action(function (Ticket $record, array $data): void {
-                        // Update action_description pada ticket
                         $record->update([
                             'action_description' => $data['action_description']
                         ]);
                         
-                        // Jika status CLOSED, update action Completed terbaru
                         if ($record->status === 'CLOSED') {
                             $completedAction = $record->actions()
                                 ->where('action_type', 'Completed')
@@ -456,7 +488,6 @@ class TicketResource extends Resource
                                     'description' => $data['action_description']
                                 ]);
                             } else {
-                                // Buat action Completed baru jika belum ada
                                 $record->actions()->create([
                                     'user_id' => Auth::id(),
                                     'action_type' => 'Completed',
@@ -465,7 +496,6 @@ class TicketResource extends Resource
                                 ]);
                             }
                         } else {
-                            // Tambahkan sebagai catatan jika ticket belum CLOSED
                             $record->actions()->create([
                                 'user_id' => Auth::id(),
                                 'action_type' => 'Note',
@@ -474,7 +504,6 @@ class TicketResource extends Resource
                             ]);
                         }
                         
-                        // Tampilkan notifikasi sukses
                         Notification::make()
                             ->title('Resolution telah diperbarui')
                             ->success()
@@ -482,12 +511,18 @@ class TicketResource extends Resource
                     })
                     ->successNotificationTitle('Resolution telah diperbarui')
                     ->visible(fn (Ticket $record) => Auth::check() && Auth::user()->can('update', $record))
+
+                    
+
             ])
+
+                    
+
+
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                     
-                    // Tambahkan bulk action untuk mengubah status
                     Tables\Actions\BulkAction::make('updateStatus')
                         ->label('Update Status')
                         ->icon('heroicon-o-arrow-path')
@@ -511,12 +546,10 @@ class TicketResource extends Resource
                             foreach ($records as $record) {
                                 $oldStatus = $record->status;
                                 
-                                // Update data tiket
                                 $updateData = [
                                     'status' => $data['status'],
                                 ];
                                 
-                                // Jika status CLOSED, tambahkan action_description dan closed_date
                                 if ($data['status'] === 'CLOSED') {
                                     $updateData['action_description'] = $data['action_description'];
                                     $updateData['closed_date'] = now();
@@ -524,7 +557,6 @@ class TicketResource extends Resource
                                 
                                 $record->update($updateData);
                                 
-                                // Tambahkan action berdasarkan status
                                 if ($data['status'] === 'CLOSED') {
                                     $record->actions()->create([
                                         'user_id' => Auth::id(),

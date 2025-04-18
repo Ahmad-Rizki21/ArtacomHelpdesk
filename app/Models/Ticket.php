@@ -29,8 +29,15 @@ class Ticket extends Model
         'sla_id',
         'evidance_path',
         'created_by',
+        'assigned_to',
     ];
 
+    protected $casts = [
+        'report_date' => 'datetime',
+        'closed_date' => 'datetime',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+    ];
 
     protected static function boot()
     {
@@ -49,38 +56,25 @@ class Ticket extends Model
         });
     }
 
-    /**
-     * Relasi ke model Customer
-     */
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class, 'customer_id');
     }
 
-    /**
-     * Relasi ke model SLA
-     */
     public function sla(): BelongsTo
     {
         return $this->belongsTo(Sla::class, 'sla_id');
     }
 
-    /**
-     * Relasi ke model User sebagai creator
-     */
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
     }
 
-    /**
-     * Relasi ke model TicketAction
-     */
     public function actions()
     {
         return $this->hasMany(\App\Models\TicketAction::class, 'ticket_id')->orderByDesc('created_at');
     }
-
 
     public function getProgressPercentageAttribute(): int  
     {  
@@ -92,15 +86,6 @@ class Ticket extends Model
         };  
     }  
 
-
-
-    /**
-     * Scope untuk filter query berdasarkan filter yang diterapkan.
-     *
-     * @param Builder $query
-     * @param array $filters
-     * @return Builder
-     */
     public function scopeFilter(Builder $query, array $filters = []): Builder
     {
         return $query

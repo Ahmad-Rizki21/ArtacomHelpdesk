@@ -106,6 +106,13 @@ return [
         ),
     ],
 
+
+    // 'providers' => [
+    
+    // App\Providers\EventServiceProvider::class,
+
+    // ],
+
     /*
     |--------------------------------------------------------------------------
     | Maintenance Mode Driver

@@ -30,6 +30,7 @@ use Devonab\FilamentEasyFooter\EasyFooterPlugin;
 use Leandrocfe\FilamentApexCharts\FilamentApexChartsPlugin;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 
+
 use Filament\Navigation\NavigationGroup;
 use Filament\Navigation\NavigationItem;
 
