@@ -14,6 +14,7 @@ use Filament\Forms\Components\Grid;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Filters\SelectFilter;
+use Illuminate\Support\HtmlString;
 
 class CustomerResource extends Resource
 {
@@ -103,7 +104,16 @@ class CustomerResource extends Resource
                     ->label('IP Address')
                     ->searchable()
                     ->copyable()
-                    ->color('secondary'),
+                    ->color('secondary')
+                    ->formatStateUsing(function ($state) {
+                        // Membuat link untuk redirect ke halaman ONT configuration
+                        return new HtmlString(
+                            '<a href="http://' . $state . '" target="_blank" class="text-primary-600 hover:text-primary-500 hover:underline font-medium">' . 
+                            $state . 
+                            ' <i class="ml-1 fas fa-external-link-alt text-xs"></i></a>'
+                        );
+                    })
+                    ->html(),
 
                 TextColumn::make('created_at')
                     ->label('Registered')
@@ -127,6 +137,13 @@ class CustomerResource extends Resource
                 Tables\Actions\DeleteAction::make()
                     ->color('danger')
                     ->requiresConfirmation(),
+                // Tambahkan action untuk menuju halaman konfigurasi ONT
+                Tables\Actions\Action::make('ont_config')
+                    ->label('ONT Config')
+                    ->color('success')
+                    ->icon('heroicon-o-cog')
+                    ->url(fn (Customer $record): string => 'http://' . $record->ip_address)
+                    ->openUrlInNewTab(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
