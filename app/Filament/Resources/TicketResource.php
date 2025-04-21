@@ -63,6 +63,7 @@ class TicketResource extends Resource
             Section::make('Ticket Information')
                 ->description('Details of the support ticket')
                 ->schema([
+                    // Ticket information fields remain the same...
                     Grid::make(2)->schema([
                         Forms\Components\Select::make('service')
                             ->label('Service')
@@ -143,40 +144,25 @@ class TicketResource extends Resource
                             ->columnSpan(1),
                     ]),
 
-                    // Ubah Select menjadi TextInput untuk email
-                    // Forms\Components\Select::make('assigned_to')
-                    // ->label('Assign to Technician')
-                    // ->options(function () {
-                    //     // Ambil semua user dengan role TEKNISI
-                    //     return \App\Models\User::role('TEKNISI')
-                    //         ->pluck('email', 'email')
-                    //         ->toArray();
-                    // })
-                    // ->searchable()
-                    // ->required()
-                    // ->helperText('Pilih email teknisi yang akan menangani tiket ini')
-                    // ->live()
-                    // ->afterStateUpdated(function (Get $get, Set $set, ?string $state) {
-                    //     \Illuminate\Support\Facades\Log::info('Email teknisi diubah ke: ' . $state);
-                    // }),
+                    // Modified to make assigned_to always optional
                     Forms\Components\Select::make('assigned_to')
-                    ->label('Assign to Technician')
-                    ->options(function () {
-                        // Ambil semua user dengan role TEKNISI dan format sebagai "Nama (Email)"
-                        return \App\Models\User::role('TEKNISI')
-                            ->get()
-                            ->mapWithKeys(function ($user) {
-                                return [$user->email => $user->name];
-                            })
-                            ->toArray();
-                    })
-                    ->searchable()
-                    ->required()
-                    ->helperText('Pilih teknisi yang akan menangani tiket ini')
-                    ->live()
-                    ->afterStateUpdated(function (Get $get, Set $set, ?string $state) {
-                        \Illuminate\Support\Facades\Log::info('Email teknisi diubah ke: ' . $state);
-                    }),
+                        ->label('Assign to Technician')
+                        ->options(function () {
+                            // Get all users with TEKNISI role formatted as "Name"
+                            return \App\Models\User::role('TEKNISI')
+                                ->get()
+                                ->mapWithKeys(function ($user) {
+                                    return [$user->email => $user->name];
+                                })
+                                ->toArray();
+                        })
+                        ->searchable()
+                        ->required(false) // Always optional
+                        ->helperText('Opsional: pilih teknisi jika diperlukan kunjungan ke lokasi')
+                        ->live()
+                        ->afterStateUpdated(function (Get $get, Set $set, ?string $state) {
+                            \Illuminate\Support\Facades\Log::info('Email teknisi diubah ke: ' . $state);
+                        }),
 
                     Forms\Components\Textarea::make('action_description')
                         ->label('Resolution / Action')
@@ -209,6 +195,7 @@ class TicketResource extends Resource
                     ]),
                 ]),
                 
+            // Other sections remain the same...
             Section::make('System Information')
                 ->description('Internal tracking details')
                 ->schema([

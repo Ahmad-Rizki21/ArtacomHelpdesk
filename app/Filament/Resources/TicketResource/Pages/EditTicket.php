@@ -60,11 +60,27 @@ class EditTicket extends EditRecord
                             'Completed' => 'Completed',
                             'Note' => 'Catatan/Tindakan'
                         ])
-                        ->required(),
+                        ->required()
+                        ->live(),
                     Forms\Components\Textarea::make('description')
                         ->label('Deskripsi Tindakan')
                         ->placeholder('Jelaskan tindakan yang dilakukan...')
                         ->required(),
+                    // Add optional field for technician assignment when status is changing to PENDING
+                    Forms\Components\Select::make('assigned_to')
+                        ->label('Assign to Technician')
+                        ->options(function () {
+                            return \App\Models\User::role('TEKNISI')
+                                ->get()
+                                ->mapWithKeys(function ($user) {
+                                    return [$user->email => $user->name];
+                                })
+                                ->toArray();
+                        })
+                        ->searchable()
+                        ->required(false) // Always optional
+                        ->helperText('Opsional: pilih teknisi jika diperlukan kunjungan ke lokasi')
+                        ->visible(fn (Get $get): bool => $get('action_type') === 'Pending Clock'),
                 ])
                 ->action(function (array $data): void {
                     // Simpan progress baru
@@ -78,10 +94,23 @@ class EditTicket extends EditRecord
 
                     // Update status tiket jika perlu
                     if ($data['action_type'] === 'Pending Clock') {
-                        $this->record->update([
+                        $updates = [
                             'status' => 'PENDING',
                             'pending_clock' => now()
-                        ]);
+                        ];
+                        
+                        // Add technician assignment only if selected
+                        if (!empty($data['assigned_to'])) {
+                            $updates['assigned_to'] = $data['assigned_to'];
+                            
+                            // Enhance description with technician info if assigned
+                            $technicianName = \App\Models\User::where('email', $data['assigned_to'])->first()?->name ?? 'Unknown';
+                            $ticketAction->update([
+                                'description' => $data['description'] . "\n\nTeknisi $technicianName ditugaskan untuk kunjungan ke lokasi."
+                            ]);
+                        }
+                        
+                        $this->record->update($updates);
                     } elseif ($data['action_type'] === 'Completed') {
                         // Jika tipe aksi Completed, update status CLOSED dan isi action_description
                         $this->record->update([
@@ -170,11 +199,26 @@ class EditTicket extends EditRecord
                         $set('closed_date', null);
                     }
                 }),
+            
+            // Modified to make assigned_to always optional
+            Forms\Components\Select::make('assigned_to')
+                ->label('Assign to Technician')
+                ->options(function () {
+                    return \App\Models\User::role('TEKNISI')
+                        ->get()
+                        ->mapWithKeys(function ($user) {
+                            return [$user->email => $user->name];
+                        })
+                        ->toArray();
+                })
+                ->searchable()
+                ->required(false) // Always optional
+                ->helperText('Opsional: pilih teknisi jika diperlukan kunjungan ke lokasi'),
                 
-            // Tambahan field action_description dengan peningkatan UX
+            // Other fields remain the same
             Forms\Components\Textarea::make('action_description')
-                ->label('Action Description / Resolution')
-                ->placeholder('Jelaskan tindakan yang dilakukan untuk menyelesaikan tiket ini...')
+                ->label('Resolution / Action')
+                ->placeholder('Jika ingin melakukan Closed Ticket WAJIB mengisi Action nya...')
                 ->helperText('Field ini wajib diisi saat ticket CLOSED. Isi otomatis dari Progress terbaru atau isi secara manual.')
                 ->rows(4)
                 ->required(fn (Get $get): bool => $get('status') === 'CLOSED')
@@ -199,6 +243,35 @@ class EditTicket extends EditRecord
                 ->label('SLA')
                 ->relationship('sla', 'name')
                 ->required(),
+                
+            // Tambahan field action_description dengan peningkatan UX
+            Forms\Components\Textarea::make('action_description')
+                ->label('Action Description / Resolution')
+                ->placeholder('Jelaskan tindakan yang dilakukan untuk menyelesaikan tiket ini...')
+                ->helperText('Field ini wajib diisi saat ticket CLOSED. Isi otomatis dari Progress terbaru atau isi secara manual.')
+                ->rows(4)
+                ->required(fn (Get $get): bool => $get('status') === 'CLOSED')
+                ->visible(fn (Get $get): bool => $get('status') === 'CLOSED'),
+
+            Forms\Components\FileUpload::make('evidance_path')
+                ->label('Upload Evidence')
+                ->acceptedFileTypes(['image/*', 'video/*', 'application/pdf'])
+                ->maxSize(10240) // max 10MB
+                ->directory('evidances') // direktori penyimpanan
+                ->preserveFilenames(), // menjaga nama file asli
+
+            // Forms\Components\TextInput::make('pending_clock')
+            //     ->label('Pending Clock')
+            //     ->disabled()
+            //     ->placeholder('Belum ada Pending'),
+            // Forms\Components\TextInput::make('closed_date')
+            //     ->label('Closed Date')
+            //     ->disabled()
+            //     ->placeholder('Belum ada Ticket Closed'),
+            // Forms\Components\Select::make('sla_id')
+            //     ->label('SLA')
+            //     ->relationship('sla', 'name')
+            //     ->required(),
 
             // Bagian untuk menampilkan evidences
             Forms\Components\Section::make('Evidences')
@@ -272,7 +345,7 @@ class EditTicket extends EditRecord
         ];
     }
 
-    // Metode untuk validasi sebelum menyimpan
+      // Metode untuk validasi sebelum menyimpan
     protected function beforeSave(): void
     {
         $data = $this->form->getState();
@@ -321,11 +394,19 @@ class EditTicket extends EditRecord
             }
             // Jika status berubah menjadi PENDING, tambahkan aksi Pending Clock
             elseif ($data['status'] === 'PENDING') {
+                $description = 'Ticket dalam status pending';
+                
+                // Add technician info to description if assigned
+                if (!empty($data['assigned_to'])) {
+                    $technicianName = \App\Models\User::where('email', $data['assigned_to'])->first()?->name ?? 'Unknown';
+                    $description .= "\n\nTeknisi $technicianName ditugaskan untuk kunjungan ke lokasi.";
+                }
+                
                 TicketAction::create([
                     'ticket_id' => $this->record->id,
                     'user_id' => Auth::id(),
                     'action_type' => 'Pending Clock',
-                    'description' => 'Ticket dalam status pending',
+                    'description' => $description,
                     'status' => 'PENDING'
                 ]);
             }

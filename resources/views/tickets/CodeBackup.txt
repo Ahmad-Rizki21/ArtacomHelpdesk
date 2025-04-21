@@ -210,7 +210,7 @@
             <span class="company-name">{{ $company ?? 'FTTH HELPDESK SYSTEM' }}</span>
         </div>
     </div>
-    {{-- <div class="main-title">LAPORAN TIKET HELPDESK</div> --}}
+    <div class="main-title">LAPORAN TIKET HELPDESK</div>
     <div class="ticket-number">Nomor Tiket: {{ $ticket->ticket_number }}</div>
 
 <!-- DETAIL TIKET -->

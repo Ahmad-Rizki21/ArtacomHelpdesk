@@ -40,7 +40,7 @@ CREATE TABLE `activity_log` (
   KEY `subject` (`subject_type`,`subject_id`),
   KEY `causer` (`causer_type`,`causer_id`),
   KEY `activity_log_log_name_index` (`log_name`)
-) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -67,7 +67,8 @@ INSERT INTO `activity_log` VALUES
 (15,'default','updated','App\\Models\\User','updated',1,'App\\Models\\User',1,'{\"attributes\":{\"name\":\"admin\",\"email\":\"admin@helpdesk.net\"},\"old\":{\"name\":\"admin\",\"email\":\"admin@helpdesk.net\"}}',NULL,'2025-03-06 02:30:48','2025-03-06 02:30:48'),
 (16,'default','updated','App\\Models\\User','updated',7,'App\\Models\\User',7,'{\"attributes\":{\"name\":\"NOC-Koko\",\"email\":\"koko@noc.com\"},\"old\":{\"name\":\"NOC-Koko\",\"email\":\"koko@noc.com\"}}',NULL,'2025-04-09 02:49:44','2025-04-09 02:49:44'),
 (17,'default','updated','App\\Models\\User','updated',6,'App\\Models\\User',6,'{\"attributes\":{\"name\":\"NOC-Rizki\",\"email\":\"rizki@noc.com\"},\"old\":{\"name\":\"NOC-Rizki\",\"email\":\"rizki@noc.com\"}}',NULL,'2025-04-09 14:11:00','2025-04-09 14:11:00'),
-(18,'default','updated','App\\Models\\User','updated',5,'App\\Models\\User',5,'{\"attributes\":{\"name\":\"NOC-Irsyad\",\"email\":\"irsyad@noc.com\"},\"old\":{\"name\":\"NOC-Irsyad\",\"email\":\"irsyad@noc.com\"}}',NULL,'2025-04-09 14:13:05','2025-04-09 14:13:05');
+(18,'default','updated','App\\Models\\User','updated',5,'App\\Models\\User',5,'{\"attributes\":{\"name\":\"NOC-Irsyad\",\"email\":\"irsyad@noc.com\"},\"old\":{\"name\":\"NOC-Irsyad\",\"email\":\"irsyad@noc.com\"}}',NULL,'2025-04-09 14:13:05','2025-04-09 14:13:05'),
+(19,'default','updated','App\\Models\\User','updated',2,'App\\Models\\User',2,'{\"attributes\":{\"name\":\"Ahmad\",\"email\":\"ahmad@helpdesk.net\"},\"old\":{\"name\":\"Ahmad\",\"email\":\"ahmad@helpdesk.net\"}}',NULL,'2025-04-16 06:32:47','2025-04-16 06:32:47');
 /*!40000 ALTER TABLE `activity_log` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -133,21 +134,9 @@ CREATE TABLE `cache` (
 LOCK TABLES `cache` WRITE;
 /*!40000 ALTER TABLE `cache` DISABLE KEYS */;
 INSERT INTO `cache` VALUES
-('1b6453892473a467d07372d45eb05abc2031647a','i:1;',1739850614),
-('1b6453892473a467d07372d45eb05abc2031647a:timer','i:1739850614;',1739850614),
-('356a192b7913b04c54574d18c28d46e6395428ab','i:1;',1739758580),
-('356a192b7913b04c54574d18c28d46e6395428ab:timer','i:1739758580;',1739758580),
-('902ba3cda1883801594b6e1b452790cc53948fda','i:1;',1740285224),
-('902ba3cda1883801594b6e1b452790cc53948fda:timer','i:1740285224;',1740285224),
-('ac3478d69a3c81fa62e60f5c3696165a4e5e6ac4','i:1;',1739462008),
-('ac3478d69a3c81fa62e60f5c3696165a4e5e6ac4:timer','i:1739462008;',1739462008),
-('da4b9237bacccdf19c0760cab7aec4a8359010b0','i:1;',1742485505),
-('da4b9237bacccdf19c0760cab7aec4a8359010b0:timer','i:1742485505;',1742485505),
-('livewire-rate-limiter:3b0590d9cecdee6c13717ca7f7a1047a4a6c95a4','i:1;',1744697565),
-('livewire-rate-limiter:3b0590d9cecdee6c13717ca7f7a1047a4a6c95a4:timer','i:1744697565;',1744697565),
-('livewire-rate-limiter:bc71088d4368d51db0eedf23d8dac35a8840fb67','i:4;',1743565574),
-('livewire-rate-limiter:bc71088d4368d51db0eedf23d8dac35a8840fb67:timer','i:1743565574;',1743565574),
-('spatie.permission.cache','a:3:{s:5:\"alias\";a:0:{}s:11:\"permissions\";a:0:{}s:5:\"roles\";a:0:{}}',1744779283);
+('livewire-rate-limiter:3b0590d9cecdee6c13717ca7f7a1047a4a6c95a4','i:1;',1745040260),
+('livewire-rate-limiter:3b0590d9cecdee6c13717ca7f7a1047a4a6c95a4:timer','i:1745040260;',1745040260),
+('spatie.permission.cache','a:3:{s:5:\"alias\";a:0:{}s:11:\"permissions\";a:0:{}s:5:\"roles\";a:0:{}}',1745213290);
 /*!40000 ALTER TABLE `cache` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -914,7 +903,7 @@ CREATE TABLE `migrations` (
   `migration` varchar(255) NOT NULL,
   `batch` int(11) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=59 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=60 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -961,7 +950,8 @@ INSERT INTO `migrations` VALUES
 (55,'2025_02_10_151725_create_ticket_updates_table',26),
 (56,'2025_02_10_160547_create_user_pelanggan',27),
 (57,'0001_01_01_000000_create_users_pelanggan_table',28),
-(58,'2025_02_10_173332_create_pelanggan_table',29);
+(58,'2025_02_10_173332_create_pelanggan_table',29),
+(59,'2025_04_15_135216_add_action_description_to_tickets_table',30);
 /*!40000 ALTER TABLE `migrations` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1074,14 +1064,8 @@ CREATE TABLE `sessions` (
 LOCK TABLES `sessions` WRITE;
 /*!40000 ALTER TABLE `sessions` DISABLE KEYS */;
 INSERT INTO `sessions` VALUES
-('9J1v5YX8uv2SWI4zSpWn3IQhEz3k9DUS5rp3lhVS',NULL,'1.1.1.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36','YTo0OntzOjY6Il90b2tlbiI7czo0MDoieDRnalpGUDBzcEJkNDg2WEg4b0JqWEZLUjZ1Mng1aVhFaFFXT2p0RCI7czozOiJ1cmwiO2E6MTp7czo4OiJpbnRlbmRlZCI7czozODoiaHR0cDovLzE5Mi4xNjguMjAwLjEyMC9hZG1pbi9kYXNoYm9hcmQiO31zOjk6Il9wcmV2aW91cyI7YToxOntzOjM6InVybCI7czozNDoiaHR0cDovLzE5Mi4xNjguMjAwLjEyMC9hZG1pbi9sb2dpbiI7fXM6NjoiX2ZsYXNoIjthOjI6e3M6Mzoib2xkIjthOjA6e31zOjM6Im5ldyI7YTowOnt9fX0=',1744598594),
-('ET2UpiubfmxtI12PPQD2JYu97kzsjbs3sdQ8XLMB',5,'1.1.1.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0','YTo2OntzOjY6Il90b2tlbiI7czo0MDoieFBXUU9zSXBKT2hLVnhvZUtzc3NCamIwVVdKVmJVR2Zzb2NhOER4SiI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6Mzk6Imh0dHA6Ly8xOTIuMTY4LjIwMC4xMjAvYWRtaW4vdGlja2V0cy8zMyI7fXM6NjoiX2ZsYXNoIjthOjI6e3M6Mzoib2xkIjthOjA6e31zOjM6Im5ldyI7YTowOnt9fXM6NTA6ImxvZ2luX3dlYl81OWJhMzZhZGRjMmIyZjk0MDE1ODBmMDE0YzdmNThlYTRlMzA5ODlkIjtpOjU7czoxNzoicGFzc3dvcmRfaGFzaF93ZWIiO3M6NjA6IiQyeSQxMiRVdUdQSUFpNW5hR2JlRG9uV0d2UXEueU1DR3cyWHVCTmhqN2V3NkhhNGdXMExWZEtIdm9JQyI7czo2OiJ0YWJsZXMiO2E6MTp7czoyMDoiTGlzdFRpY2tldHNfcGVyX3BhZ2UiO3M6MzoiYWxsIjt9fQ==',1744599607),
-('gjXYS728Iv8WcCpiiMHCc5m3XquzjaGRDoS4Fqnt',5,'1.1.1.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36','YTo1OntzOjY6Il90b2tlbiI7czo0MDoiS3VuTG5rWkRMTzhvT1ZGZTRDRm4xMVFhNXowOXdsYXFTTzFwajhMTiI7czo1MDoibG9naW5fd2ViXzU5YmEzNmFkZGMyYjJmOTQwMTU4MGYwMTRjN2Y1OGVhNGUzMDk4OWQiO2k6NTtzOjE3OiJwYXNzd29yZF9oYXNoX3dlYiI7czo2MDoiJDJ5JDEyJFV1R1BJQWk1bmFHYmVEb25XR3ZRcS55TUNHdzJYdUJOaGo3ZXc2SGE0Z1cwTFZkS0h2b0lDIjtzOjk6Il9wcmV2aW91cyI7YToxOntzOjM6InVybCI7czozNjoiaHR0cDovLzE5Mi4xNjguMjAwLjEyMC9hZG1pbi90aWNrZXRzIjt9czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319fQ==',1744625054),
-('mBs00VkCu7tpnG1IGGiXmqat0P5nOROX9XQf0IZe',NULL,'1.1.1.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36','YTozOntzOjY6Il90b2tlbiI7czo0MDoiVnBHaDdEb0FVVXd1QWh3T3Q2R0VNYnVUVDNycTFGbVRMeXIxTTA1TSI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6MzQ6Imh0dHA6Ly8xOTIuMTY4LjIwMC4xMjAvYWRtaW4vbG9naW4iO31zOjY6Il9mbGFzaCI7YToyOntzOjM6Im9sZCI7YTowOnt9czozOiJuZXciO2E6MDp7fX19',1744684335),
-('MvCOtgNhnBIzaEGlu7YEXlZI9EQHMypLJDnqb1wm',2,'1.1.1.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0','YTo2OntzOjY6Il90b2tlbiI7czo0MDoiM1lyaUx4NWFwOXZxYmk1UjBTUWk1UENBZmJmRWI2R0I5U1pXMGNKRSI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6MzY6Imh0dHA6Ly8xOTIuMTY4LjIwMC4xMjAvYWRtaW4vdGlja2V0cyI7fXM6NjoiX2ZsYXNoIjthOjI6e3M6Mzoib2xkIjthOjA6e31zOjM6Im5ldyI7YTowOnt9fXM6NTA6ImxvZ2luX3dlYl81OWJhMzZhZGRjMmIyZjk0MDE1ODBmMDE0YzdmNThlYTRlMzA5ODlkIjtpOjI7czoxNzoicGFzc3dvcmRfaGFzaF93ZWIiO3M6NjA6IiQyeSQxMiR6T2dGLzJTb3h2QVI3ZG5jTlpmaTRPL00vdGFZUmR3ZmQ0T3RyN3dHNU1pTlNkdjJUN1RJQyI7czoxNjoiZmlsdGVyZWRfdGlja2V0cyI7TzoyOToiSWxsdW1pbmF0ZVxTdXBwb3J0XENvbGxlY3Rpb24iOjI6e3M6ODoiACoAaXRlbXMiO2E6MTp7aTowO2E6MTI6e3M6OToibm9fdGlja2V0IjtzOjE0OiJCYWNrQm9uZS00MTc3MSI7czozOiJjaWQiO3M6Mjg6IjExMTQwMTAwODAwNSAoUGFyYW1hIFNlcmFuZykiO3M6OToiamVuaXNfaXNwIjtzOjk6IklDT04gUExVUyI7czo2OiJsb2thc2kiO3M6MzI6IlBlcnVtYWhhbiBQYXJhbWEgU2VyYW5nIC0gQmFudGVuIjtzOjE3OiJleHRyYV9kZXNjcmlwdGlvbiI7czoyMDoibm9tb3IgdGlrZXQgRU0yNFFWRjkiO3M6Njoic3RhdHVzIjtzOjY6IkNMT1NFRCI7czo5OiJvcGVuX2RhdGUiO3M6MTY6IjIwLTAyLTIwMjUgMTU6MDkiO3M6MTI6InBlbmRpbmdfZGF0ZSI7czoxNjoiMjAtMDItMjAyNSAxNToxMCI7czoxMToiY2xvc2VkX2RhdGUiO3M6MTY6IjIwLTAyLTIwMjUgMTY6NTUiO3M6MTA6ImNyZWF0ZWRfYnkiO3M6NToiQWhtYWQiO3M6MTA6ImNyZWF0ZWRfYXQiO086MjU6IklsbHVtaW5hdGVcU3VwcG9ydFxDYXJib24iOjM6e3M6NDoiZGF0ZSI7czoyNjoiMjAyNS0wMi0yMCAxNTowOTo1NC4wMDAwMDAiO3M6MTM6InRpbWV6b25lX3R5cGUiO2k6MztzOjg6InRpbWV6b25lIjtzOjEyOiJBc2lhL0pha2FydGEiO31zOjEwOiJ1cGRhdGVkX2F0IjtPOjI1OiJJbGx1bWluYXRlXFN1cHBvcnRcQ2FyYm9uIjozOntzOjQ6ImRhdGUiO3M6MjY6IjIwMjUtMDItMjAgMTY6NTU6MzcuMDAwMDAwIjtzOjEzOiJ0aW1lem9uZV90eXBlIjtpOjM7czo4OiJ0aW1lem9uZSI7czoxMjoiQXNpYS9KYWthcnRhIjt9fX1zOjI4OiIAKgBlc2NhcGVXaGVuQ2FzdGluZ1RvU3RyaW5nIjtiOjA7fX0=',1744599044),
-('OsPg7DwvrQifK5ot5K51rVz7QxHIISV37TkqoOCH',2,'1.1.1.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0','YTo1OntzOjY6Il90b2tlbiI7czo0MDoiZjJndkRsbDhBSVA3YjB1QUI2Zk5teXRHVWJpajNxbHV5eTg1clU4QyI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6MzY6Imh0dHA6Ly8xOTIuMTY4LjIwMC4xMjAvYWRtaW4vdGlja2V0cyI7fXM6NjoiX2ZsYXNoIjthOjI6e3M6Mzoib2xkIjthOjA6e31zOjM6Im5ldyI7YTowOnt9fXM6NTA6ImxvZ2luX3dlYl81OWJhMzZhZGRjMmIyZjk0MDE1ODBmMDE0YzdmNThlYTRlMzA5ODlkIjtpOjI7czoxNzoicGFzc3dvcmRfaGFzaF93ZWIiO3M6NjA6IiQyeSQxMiR6T2dGLzJTb3h2QVI3ZG5jTlpmaTRPL00vdGFZUmR3ZmQ0T3RyN3dHNU1pTlNkdjJUN1RJQyI7fQ==',1744697518),
-('t68BXF4W6CfseYMown6lHbcq3grONrxvXAu7g5Qp',7,'1.1.1.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0','YTo2OntzOjY6Il90b2tlbiI7czo0MDoibzVFRERSRzBVdnlLVGxQVXUzTU9KOVlvRFBoY3BEbUFXQVZiUjlVcCI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6MzY6Imh0dHA6Ly8xOTIuMTY4LjIwMC4xMjAvYWRtaW4vdGlja2V0cyI7fXM6NjoiX2ZsYXNoIjthOjI6e3M6Mzoib2xkIjthOjA6e31zOjM6Im5ldyI7YTowOnt9fXM6NTA6ImxvZ2luX3dlYl81OWJhMzZhZGRjMmIyZjk0MDE1ODBmMDE0YzdmNThlYTRlMzA5ODlkIjtpOjc7czoxNzoicGFzc3dvcmRfaGFzaF93ZWIiO3M6NjA6IiQyeSQxMiQ0THNkZUZRWC8ybHFTNHpHTnJ3Umh1QjhaQXNIeHhNMlhoZlZreDBrLlZILndDRnNTVzFWNiI7czo4OiJmaWxhbWVudCI7YTowOnt9fQ==',1744693192),
-('zQ8f8OLRztXQhD9iDOzJMnObitOSqMCognsYjZy9',5,'1.1.1.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36','YTo2OntzOjY6Il90b2tlbiI7czo0MDoiZGJtbzZyb3lYV3gwR3pyTlBEZ3pUdmw0a0E5STNqb200S25kOGRuSyI7czo1MDoibG9naW5fd2ViXzU5YmEzNmFkZGMyYjJmOTQwMTU4MGYwMTRjN2Y1OGVhNGUzMDk4OWQiO2k6NTtzOjE3OiJwYXNzd29yZF9oYXNoX3dlYiI7czo2MDoiJDJ5JDEyJFV1R1BJQWk1bmFHYmVEb25XR3ZRcS55TUNHdzJYdUJOaGo3ZXc2SGE0Z1cwTFZkS0h2b0lDIjtzOjk6Il9wcmV2aW91cyI7YToxOntzOjM6InVybCI7czozNjoiaHR0cDovLzE5Mi4xNjguMjAwLjEyMC9hZG1pbi90aWNrZXRzIjt9czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czo4OiJmaWxhbWVudCI7YTowOnt9fQ==',1744605564);
+('iHeazNmtdbEc3e6Tf3U06ZE2xm53HMteSPftCLng',2,'192.168.200.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0','YTo1OntzOjY6Il90b2tlbiI7czo0MDoiVTdBM2Zhd1lCN0RtaUk2bGlIQTJPYU82ZWpHV3l6WUZhdldDc1g2MSI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6Mzg6Imh0dHA6Ly8xOTIuMTY4LjIwMC4xMjAvYWRtaW4vZGFzaGJvYXJkIjt9czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czo1MDoibG9naW5fd2ViXzU5YmEzNmFkZGMyYjJmOTQwMTU4MGYwMTRjN2Y1OGVhNGUzMDk4OWQiO2k6MjtzOjE3OiJwYXNzd29yZF9oYXNoX3dlYiI7czo2MDoiJDJ5JDEyJHpPZ0YvMlNveHZBUjdkbmNOWmZpNE8vTS90YVlSZHdmZDRPdHI3d0c1TWlOU2R2MlQ3VElDIjt9',1745126907),
+('VQHm0LOYbd1weEH3PbZmWeqrtR6iHeAseZQMhJvB',7,'1.1.1.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0','YTo3OntzOjY6Il90b2tlbiI7czo0MDoiaHBkcFE1OGJJbGU5N2tDNTVCZTg5TVlSajRDWFd1R3pENm5URkl4TCI7czozOiJ1cmwiO2E6MDp7fXM6OToiX3ByZXZpb3VzIjthOjE6e3M6MzoidXJsIjtzOjM2OiJodHRwOi8vMTkyLjE2OC4yMDAuMTIwL2FkbWluL3RpY2tldHMiO31zOjY6Il9mbGFzaCI7YToyOntzOjM6Im9sZCI7YTowOnt9czozOiJuZXciO2E6MDp7fX1zOjUwOiJsb2dpbl93ZWJfNTliYTM2YWRkYzJiMmY5NDAxNTgwZjAxNGM3ZjU4ZWE0ZTMwOTg5ZCI7aTo3O3M6MTc6InBhc3N3b3JkX2hhc2hfd2ViIjtzOjYwOiIkMnkkMTIkNExzZGVGUVgvMmxxUzR6R05yd1JodUI4WkFzSHh4TTJYaGZWa3gway5WSC53Q0ZzU1cxVjYiO3M6ODoiZmlsYW1lbnQiO2E6MDp7fX0=',1745042181);
 /*!40000 ALTER TABLE `sessions` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1147,6 +1131,7 @@ CREATE TABLE `tickets` (
   `updated_at` timestamp NULL DEFAULT NULL,
   `problem_summary` varchar(255) DEFAULT NULL,
   `extra_description` text DEFAULT NULL,
+  `action_description` text DEFAULT NULL,
   `sla_id` bigint(20) unsigned DEFAULT NULL,
   `evidance_path` varchar(255) DEFAULT NULL,
   `created_by` bigint(20) unsigned NOT NULL,
@@ -1157,7 +1142,7 @@ CREATE TABLE `tickets` (
   KEY `tickets_sla_id_foreign` (`sla_id`),
   CONSTRAINT `tickets_customer_id_foreign` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`) ON DELETE CASCADE,
   CONSTRAINT `tickets_sla_id_foreign` FOREIGN KEY (`sla_id`) REFERENCES `s_l_a_s` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=36 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=38 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1167,27 +1152,29 @@ CREATE TABLE `tickets` (
 LOCK TABLES `tickets` WRITE;
 /*!40000 ALTER TABLE `tickets` DISABLE KEYS */;
 INSERT INTO `tickets` VALUES
-(13,2,'ISP-JAKINET','TFTTH-67AE2CA887DBE',10,'2025-02-13 17:32:24','CLOSED',NULL,'2025-02-14 17:27:45','2025-02-13 17:32:24','2025-02-14 17:27:45','LOW SPEED','info pic dilokasi jaringan lambat, saat kami melakukan pengecekan lewat system redaman dilokasi kurang bagus',3,NULL,4),
-(14,3,'ISP-JAKINET','TFTTH-67B02CB3B00E6',381,'2025-02-15 05:57:07','CLOSED',NULL,'2025-02-15 09:01:41','2025-02-15 05:57:07','2025-02-15 09:01:41','INDIKATOR LOS','LOS MERAH MOHON DI TL',2,'evidances/WhatsApp Image 2025-02-15 at 08.21.28.jpeg',4),
-(15,4,'ISP-JAKINET','TFTTH-67B29BC54E046',321,'2025-02-17 02:15:33','CLOSED',NULL,'2025-02-17 04:17:01','2025-02-17 02:15:33','2025-02-17 04:17:01','INDIKATOR LOS','LOSS MERAH MOHON DI TL',2,'evidances/WhatsApp Video 2025-02-16 at 18.46.54_e9bce6ce.mp4',1),
-(16,5,'ISP-JAKINET','TFTTH-67B2B9A795681',544,'2025-02-17 04:23:03','CLOSED',NULL,'2025-02-17 05:36:48','2025-02-17 04:23:03','2025-02-17 05:36:48','INDIKATOR LOS','modem loss merah',2,'evidances/WhatsApp Video 2025-02-17 at 11.12.26.mp4',4),
-(17,6,'ISP-JELANTIK','TFTTH-67B368D607783',463,'2025-02-17 16:50:30','CLOSED',NULL,'2025-02-18 03:22:21','2025-02-17 16:50:30','2025-02-18 03:22:21','NO INTERNET ACCESS','u redaman di sisi perangkat low power yang menyebabkan internet tidak up. ',1,NULL,4),
-(18,7,'ISP-JELANTIK','TFTTH-67B403416DFF0',454,'2025-02-18 03:49:21','CLOSED',NULL,'2025-02-18 04:04:51','2025-02-18 03:49:21','2025-02-18 04:04:51','LOW SPEED','keluhan internet lambat,redaman kurang baik',3,'evidances/198e3f36-927c-4f2f-9954-e0d2bf4bb5ef.jpg',4),
-(19,8,'ISP-JELANTIK','TFTTH-67BAA4F874661',413,'2025-02-23 04:32:56','CLOSED',NULL,'2025-02-24 02:18:12','2025-02-23 04:32:56','2025-02-24 02:18:12','MODEM HANG','modem mati',2,'evidances/4b0c8570-34e1-4891-b4cb-214441f441e9.jpeg',7),
-(20,9,'ISP-JAKINET','TFTTH-67BE71DD3C33D',86,'2025-02-26 01:43:57','CLOSED',NULL,'2025-02-26 04:52:55','2025-02-26 01:43:57','2025-02-26 04:52:55','MODEM HANG','modem hang setelah terkena kebocoran air dilokasi',1,NULL,7),
-(21,10,'ISP-JAKINET','TFTTH-67BFFDF997460',78,'2025-02-27 05:54:01','CLOSED',NULL,'2025-02-27 07:07:46','2025-02-27 05:54:01','2025-02-27 07:07:46','LOW SPEED','internet putus nyambung',3,NULL,4),
-(22,11,'ISP-JELANTIK','TFTTH-67C0198CAC1B7',413,'2025-02-27 07:51:40','CLOSED',NULL,'2025-03-04 02:03:26','2025-02-27 07:51:40','2025-03-04 02:03:26','LOW SPEED','internet lemot',3,NULL,4),
-(24,13,'ISP-JELANTIK','TFTTH-67C133E8E32E0',510,'2025-02-28 03:56:24','CLOSED',NULL,'2025-02-28 08:05:52','2025-02-28 03:56:24','2025-02-28 08:05:52','LOW SPEED','low speed',3,NULL,4),
-(25,14,'ISP-JAKINET','TFTTH-67C7E66C1D792',104,'2025-03-05 05:51:40','CLOSED',NULL,'2025-03-06 02:56:39','2025-03-05 05:51:40','2025-03-06 02:56:39','NO INTERNET ACCESS','tidak jaringan  karena gagal menyambung ke jaringan ',3,NULL,7),
-(26,15,'ISP-JAKINET','TFTTH-67C9092C46F8D',10,'2025-03-06 02:32:12','CLOSED',NULL,'2025-03-06 04:53:09','2025-03-06 02:32:12','2025-03-06 04:53:09','NO INTERNET ACCESS','kita cek saat ini redaman tinggi',2,'evidances/WhatsApp Image 2025-03-06 at 09.25.55_2a2a9e90.jpg',2),
-(27,16,'ISP-JAKINET','TFTTH-67D748990AD02',590,'2025-03-16 21:54:33','CLOSED',NULL,'2025-03-20 07:36:33','2025-03-16 21:54:33','2025-03-20 07:36:33','INDIKATOR LOS','indikator los merah',1,NULL,4),
-(28,17,'ISP-JAKINET','TFTTH-67DC37D14B79D',358,'2025-03-20 15:44:17','CLOSED',NULL,'2025-03-21 07:53:43','2025-03-20 15:44:17','2025-03-21 07:53:43','INDIKATOR LOS','Indikator Los Mohon di TL',2,'evidances/WhatsApp Video 2025-03-20 at 20.35.26_0cc6c1bd.mp4',2),
-(29,18,'ISP-JELANTIK','TFTTH-67E4D0F7EC668',414,'2025-03-27 04:15:51','CLOSED',NULL,'2025-03-27 07:46:55','2025-03-27 04:15:51','2025-03-27 07:46:55','MODEM HANG','Modem mati total',2,NULL,7),
-(31,20,'ISP-JELANTIK','TFTTH-67F4D03EC90F8',533,'2025-04-08 07:29:02','CLOSED',NULL,'2025-04-08 07:55:28','2025-04-08 07:29:02','2025-04-08 07:55:28','NO INTERNET ACCESS','Kabel power terputus',1,NULL,7),
-(32,21,'ISP-JELANTIK','TFTTH-67F5E31672200',601,'2025-04-09 03:01:42','CLOSED',NULL,'2025-04-14 04:38:46','2025-04-09 03:01:42','2025-04-14 04:38:46','MODEM HANG','[9/4 09.19] Yabes Etang 😇: Pak, apakah sdh dilayani oleh customer service?\n[9/4 09.22] Ahmad Parama B11 No 17 Fauzi: sudah balas pak\n[9/4 09.23] Yabes Etang 😇: Kondisi saat ini bgmn Pak?\n[9/4 09.23] Ahmad Parama B11 No 17 Fauzi: masih belum nyala Pak\n[9/4 09.23] Ahmad Parama B11 No 17 Fauzi: mau buat vidio suruh CS nya Pak',2,NULL,2),
-(33,22,'ISP-JELANTIK','TFTTH-67F680AF6BD01',462,'2025-04-09 14:14:07','CLOSED',NULL,'2025-04-14 04:39:14','2025-04-09 14:14:07','2025-04-14 04:39:14','INDIKATOR LOS','Modem Fo dilokas los merah terindikasi fo cut',2,NULL,5),
-(34,23,'ISP-JAKINET','TFTTH-67F7903691B12',125,'2025-04-10 09:32:38','CLOSED',NULL,'2025-04-10 10:08:26','2025-04-10 09:32:38','2025-04-10 10:08:26','INDIKATOR LOS','fo los merah',3,NULL,5),
-(35,24,'ISP-JELANTIK','TFTTH-67FDE714879CD',581,'2025-04-15 04:56:52','CLOSED',NULL,'2025-04-15 04:57:19','2025-04-15 04:56:52','2025-04-15 04:57:19','MODEM HANG','Jaringan lambat',1,NULL,7);
+(13,2,'ISP-JAKINET','TFTTH-67AE2CA887DBE',10,'2025-02-13 17:32:24','CLOSED',NULL,'2025-02-14 17:27:45','2025-02-13 17:32:24','2025-02-14 17:27:45','LOW SPEED','info pic dilokasi jaringan lambat, saat kami melakukan pengecekan lewat system redaman dilokasi kurang bagus',NULL,3,NULL,4),
+(14,3,'ISP-JAKINET','TFTTH-67B02CB3B00E6',381,'2025-02-15 05:57:07','CLOSED',NULL,'2025-02-15 09:01:41','2025-02-15 05:57:07','2025-02-15 09:01:41','INDIKATOR LOS','LOS MERAH MOHON DI TL',NULL,2,'evidances/WhatsApp Image 2025-02-15 at 08.21.28.jpeg',4),
+(15,4,'ISP-JAKINET','TFTTH-67B29BC54E046',321,'2025-02-17 02:15:33','CLOSED',NULL,'2025-02-17 04:17:01','2025-02-17 02:15:33','2025-02-17 04:17:01','INDIKATOR LOS','LOSS MERAH MOHON DI TL',NULL,2,'evidances/WhatsApp Video 2025-02-16 at 18.46.54_e9bce6ce.mp4',1),
+(16,5,'ISP-JAKINET','TFTTH-67B2B9A795681',544,'2025-02-17 04:23:03','CLOSED',NULL,'2025-02-17 05:36:48','2025-02-17 04:23:03','2025-02-17 05:36:48','INDIKATOR LOS','modem loss merah',NULL,2,'evidances/WhatsApp Video 2025-02-17 at 11.12.26.mp4',4),
+(17,6,'ISP-JELANTIK','TFTTH-67B368D607783',463,'2025-02-17 16:50:30','CLOSED',NULL,'2025-02-18 03:22:21','2025-02-17 16:50:30','2025-02-18 03:22:21','NO INTERNET ACCESS','u redaman di sisi perangkat low power yang menyebabkan internet tidak up. ',NULL,1,NULL,4),
+(18,7,'ISP-JELANTIK','TFTTH-67B403416DFF0',454,'2025-02-18 03:49:21','CLOSED',NULL,'2025-02-18 04:04:51','2025-02-18 03:49:21','2025-02-18 04:04:51','LOW SPEED','keluhan internet lambat,redaman kurang baik',NULL,3,'evidances/198e3f36-927c-4f2f-9954-e0d2bf4bb5ef.jpg',4),
+(19,8,'ISP-JELANTIK','TFTTH-67BAA4F874661',413,'2025-02-23 04:32:56','CLOSED',NULL,'2025-02-24 02:18:12','2025-02-23 04:32:56','2025-02-24 02:18:12','MODEM HANG','modem mati',NULL,2,'evidances/4b0c8570-34e1-4891-b4cb-214441f441e9.jpeg',7),
+(20,9,'ISP-JAKINET','TFTTH-67BE71DD3C33D',86,'2025-02-26 01:43:57','CLOSED',NULL,'2025-02-26 04:52:55','2025-02-26 01:43:57','2025-02-26 04:52:55','MODEM HANG','modem hang setelah terkena kebocoran air dilokasi',NULL,1,NULL,7),
+(21,10,'ISP-JAKINET','TFTTH-67BFFDF997460',78,'2025-02-27 05:54:01','CLOSED',NULL,'2025-02-27 07:07:46','2025-02-27 05:54:01','2025-02-27 07:07:46','LOW SPEED','internet putus nyambung',NULL,3,NULL,4),
+(22,11,'ISP-JELANTIK','TFTTH-67C0198CAC1B7',413,'2025-02-27 07:51:40','CLOSED',NULL,'2025-03-04 02:03:26','2025-02-27 07:51:40','2025-03-04 02:03:26','LOW SPEED','internet lemot',NULL,3,NULL,4),
+(24,13,'ISP-JELANTIK','TFTTH-67C133E8E32E0',510,'2025-02-28 03:56:24','CLOSED',NULL,'2025-02-28 08:05:52','2025-02-28 03:56:24','2025-02-28 08:05:52','LOW SPEED','low speed',NULL,3,NULL,4),
+(25,14,'ISP-JAKINET','TFTTH-67C7E66C1D792',104,'2025-03-05 05:51:40','CLOSED',NULL,'2025-03-06 02:56:39','2025-03-05 05:51:40','2025-03-06 02:56:39','NO INTERNET ACCESS','tidak jaringan  karena gagal menyambung ke jaringan ',NULL,3,NULL,7),
+(26,15,'ISP-JAKINET','TFTTH-67C9092C46F8D',10,'2025-03-06 02:32:12','CLOSED',NULL,'2025-03-06 04:53:09','2025-03-06 02:32:12','2025-03-06 04:53:09','NO INTERNET ACCESS','kita cek saat ini redaman tinggi',NULL,2,'evidances/WhatsApp Image 2025-03-06 at 09.25.55_2a2a9e90.jpg',2),
+(27,16,'ISP-JAKINET','TFTTH-67D748990AD02',590,'2025-03-16 21:54:33','CLOSED',NULL,'2025-03-20 07:36:33','2025-03-16 21:54:33','2025-03-20 07:36:33','INDIKATOR LOS','indikator los merah',NULL,1,NULL,4),
+(28,17,'ISP-JAKINET','TFTTH-67DC37D14B79D',358,'2025-03-20 15:44:17','CLOSED',NULL,'2025-03-21 07:53:43','2025-03-20 15:44:17','2025-03-21 07:53:43','INDIKATOR LOS','Indikator Los Mohon di TL',NULL,2,'evidances/WhatsApp Video 2025-03-20 at 20.35.26_0cc6c1bd.mp4',2),
+(29,18,'ISP-JELANTIK','TFTTH-67E4D0F7EC668',414,'2025-03-27 04:15:51','CLOSED',NULL,'2025-03-27 07:46:55','2025-03-27 04:15:51','2025-03-27 07:46:55','MODEM HANG','Modem mati total',NULL,2,NULL,7),
+(31,20,'ISP-JELANTIK','TFTTH-67F4D03EC90F8',533,'2025-04-08 07:29:02','CLOSED',NULL,'2025-04-08 07:55:28','2025-04-08 07:29:02','2025-04-08 07:55:28','NO INTERNET ACCESS','Kabel power terputus',NULL,1,NULL,7),
+(32,21,'ISP-JELANTIK','TFTTH-67F5E31672200',601,'2025-04-09 03:01:42','CLOSED',NULL,'2025-04-14 04:38:46','2025-04-09 03:01:42','2025-04-14 04:38:46','MODEM HANG','[9/4 09.19] Yabes Etang 😇: Pak, apakah sdh dilayani oleh customer service?\n[9/4 09.22] Ahmad Parama B11 No 17 Fauzi: sudah balas pak\n[9/4 09.23] Yabes Etang 😇: Kondisi saat ini bgmn Pak?\n[9/4 09.23] Ahmad Parama B11 No 17 Fauzi: masih belum nyala Pak\n[9/4 09.23] Ahmad Parama B11 No 17 Fauzi: mau buat vidio suruh CS nya Pak',NULL,2,NULL,2),
+(33,22,'ISP-JELANTIK','TFTTH-67F680AF6BD01',462,'2025-04-09 14:14:07','CLOSED',NULL,'2025-04-14 04:39:14','2025-04-09 14:14:07','2025-04-14 04:39:14','INDIKATOR LOS','Modem Fo dilokas los merah terindikasi fo cut',NULL,2,NULL,5),
+(34,23,'ISP-JAKINET','TFTTH-67F7903691B12',125,'2025-04-10 09:32:38','CLOSED',NULL,'2025-04-10 10:08:26','2025-04-10 09:32:38','2025-04-10 10:08:26','INDIKATOR LOS','fo los merah',NULL,3,NULL,5),
+(35,24,'ISP-JELANTIK','TFTTH-67FDE714879CD',581,'2025-04-15 04:56:52','CLOSED',NULL,'2025-04-15 04:57:19','2025-04-15 04:56:52','2025-04-15 04:57:19','MODEM HANG','Jaringan lambat',NULL,1,NULL,7),
+(36,25,'ISP-JAKINET','TFTTH-67FE2C269A1E5',42,'2025-04-15 09:51:34','CLOSED',NULL,'2025-04-17 06:53:03','2025-04-15 09:51:34','2025-04-17 06:53:03','MODEM HANG','Modem mati total','  action: resplacing & ganti modem karna modem yang lama mati total. ',1,NULL,5),
+(37,26,'ISP-JELANTIK','TFTTH-680333B42022C',429,'2025-04-19 05:25:08','CLOSED',NULL,'2025-04-19 05:56:15','2025-04-19 05:25:08','2025-04-19 05:56:15','LOW SPEED','jaringan internet tidak dapat digunakan dengan baik padahal hanya 1 hp saja yg digunakan.\n','replace modem',3,NULL,7);
 /*!40000 ALTER TABLE `tickets` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1221,7 +1208,7 @@ LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
 INSERT INTO `users` VALUES
 (1,'admin','admin@helpdesk.net',NULL,'$2y$12$a/TiPhSonBbyPnBblTeEy.6ETbNvX4bsjZ7tm/vix0c1Ev7kp.Aei','ORyrIru0wYPqX2ueC9BRc4ACtz5hlFN91EEnfzpdiliN2cbNJOW4NWYADDwV','2025-01-19 22:18:11','2025-01-21 18:08:50','Admin'),
-(2,'Ahmad','ahmad@helpdesk.net',NULL,'$2y$12$zOgF/2SoxvAR7dncNZfi4O/M/taYRdwfd4Otr7wG5MiNSdv2T7TIC',NULL,'2025-01-21 18:13:04','2025-01-21 18:13:04','Helpdesk'),
+(2,'Ahmad','ahmad@helpdesk.net',NULL,'$2y$12$zOgF/2SoxvAR7dncNZfi4O/M/taYRdwfd4Otr7wG5MiNSdv2T7TIC','CxV34rBHSzcSoJPc6cthzcdjqpkBWjC0xDmlO7dwSWWOR3WoDDDm4dHfWO6E','2025-01-21 18:13:04','2025-01-21 18:13:04','Helpdesk'),
 (3,'NOC-Baihaqi','baihaqi@noc.com',NULL,'$2y$12$abHG74wKX6v3dyML2Tm2VONliE45XU7Y2yJHk2G6h.SuZsFPWn5JG',NULL,'2025-01-21 18:45:14','2025-01-21 18:45:14','Helpdesk'),
 (4,'NOC-Dani','dani@noc.com',NULL,'$2y$12$yVTrCAkycGsb63hz5IOdju8MaodLrDJBWIu6CJSZEjMiW7VTmXP7e','p5qEivG0YSeuaMuOW4nnihdKv8dbiLYXdDu23fobxDYFhDhM539GXkdqwJD5','2025-01-21 18:45:48','2025-01-21 18:45:48','Helpdesk'),
 (5,'NOC-Irsyad','irsyad@noc.com',NULL,'$2y$12$UuGPIAi5naGbeDonWGvQq.yMCGw2XuBNhj7ew6Ha4gW0LVdKHvoIC','3i9grZhXALpEtHviXqnFaO0qHvFpfGnngJRnhSGMaJPZ54Wg6pPM6L4hdYiI','2025-01-21 18:46:22','2025-01-21 18:46:22','Helpdesk'),
@@ -1242,4 +1229,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-04-15 13:20:45
+-- Dump completed on 2025-04-20 12:34:08

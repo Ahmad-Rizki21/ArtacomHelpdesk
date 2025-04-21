@@ -68,7 +68,26 @@ class ViewTicket extends ViewRecord
                                     default => 'gray',
                                 }),
                         ]),
-                        // Perbaikan tampilan action_description
+                        
+                        // Added assigned technician display
+                        TextEntry::make('assigned_to')
+                            ->label('Assigned Technician')
+                            ->placeholder('No technician assigned')
+                            ->formatStateUsing(function ($state) {
+                                if (empty($state)) {
+                                    return new HtmlString('<span class="text-gray-500">No technician assigned</span>');
+                                }
+                                
+                                $user = \App\Models\User::where('email', $state)->first();
+                                
+                                if ($user) {
+                                    return new HtmlString('<span class="text-green-500 font-medium">' . e($user->name) . '</span>');
+                                }
+                                
+                                return $state;
+                            }),
+                        
+                        // Resolution/Action display
                         TextEntry::make('action_description')
                             ->label('Resolution / Action')
                             ->placeholder('Belum ada penanganan')
@@ -97,6 +116,7 @@ class ViewTicket extends ViewRecord
                                 // Gunakan styling yang konsisten dengan tema gelap
                                 return new HtmlString('<div class="p-3 rounded border border-gray-600 bg-gray-800 text-white">' . e($state) . '</div>');
                             }),
+                            
                         TextEntry::make('evidance_path')
                             ->label('Evidence')
                             ->visible(fn ($record) => !empty($record->evidance_path))
@@ -172,31 +192,31 @@ class ViewTicket extends ViewRecord
     {
         return [
             \Filament\Actions\Action::make('export_pdf')
-            ->label('Ekspor PDF')
-            ->color('success')
-            ->icon('heroicon-o-arrow-down-tray')
-            ->action(function () {
-                $ticket = $this->record->load(['actions.user', 'customer', 'sla']);
-                $today = now()->format('d-m-Y H:i:s');
-                $company = 'FTTH JELANTIK HELPDESK';
+                ->label('Ekspor PDF')
+                ->color('success')
+                ->icon('heroicon-o-arrow-down-tray')
+                ->action(function () {
+                    $ticket = $this->record->load(['actions.user', 'customer', 'sla']);
+                    $today = now()->format('d-m-Y H:i:s');
+                    $company = 'FTTH JELANTIK HELPDESK';
 
-                $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('tickets.pdf-template', [
-                    'ticket' => $ticket,
-                    'today' => $today,
-                    'company' => $company,
-                ]);
-                $filename = 'TICKET-' . $ticket->ticket_number . '.pdf';
+                    $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('tickets.pdf-template', [
+                        'ticket' => $ticket,
+                        'today' => $today,
+                        'company' => $company,
+                    ]);
+                    $filename = 'TICKET-' . $ticket->ticket_number . '.pdf';
 
-                return response()->streamDownload(
-                    fn () => print($pdf->stream()),
-                    $filename
-                );
-            }),
+                    return response()->streamDownload(
+                        fn () => print($pdf->stream()),
+                        $filename
+                    );
+                }),
 
             \Filament\Actions\EditAction::make()->label('Edit'),
             \Filament\Actions\DeleteAction::make()->label('Delete'),
 
-            // Form tambah progress dengan logic yang ditingkatkan untuk action_description
+            // Modified form for add progress with optional technician assignment
             \Filament\Actions\Action::make('addProgress')
                 ->label('Tambah Progress')
                 ->form([
@@ -222,6 +242,22 @@ class ViewTicket extends ViewRecord
                             }
                             return 'Bisa copy-paste hasil ping, akan tampil sesuai baris.';
                         }),
+                    // Add optional field for technician assignment
+                    \Filament\Forms\Components\Select::make('assigned_to')
+                        ->label('Assign to Technician')
+                        ->options(function () {
+                            return \App\Models\User::role('TEKNISI')
+                                ->get()
+                                ->mapWithKeys(function ($user) {
+                                    return [$user->email => $user->name];
+                                })
+                                ->toArray();
+                        })
+                        ->searchable()
+                        ->required(false) // Always optional
+                        ->placeholder('Tidak ada teknisi yang ditugaskan')
+                        ->helperText('Opsional: pilih teknisi jika diperlukan kunjungan ke lokasi')
+                        ->visible(fn (\Filament\Forms\Get $get): bool => $get('action_type') === 'Pending Clock'),
                 ])
                 ->action(function (array $data): void {
                     try {
@@ -240,6 +276,19 @@ class ViewTicket extends ViewRecord
                         if ($data['action_type'] === 'Pending Clock') {
                             $updates['status'] = 'PENDING';
                             $updates['pending_clock'] = now();
+                            
+                            // Add assigned_to only if provided
+                            if (!empty($data['assigned_to'])) {
+                                $updates['assigned_to'] = $data['assigned_to'];
+                                
+                                // Enhance the description with technician assignment info
+                                $technicianName = \App\Models\User::where('email', $data['assigned_to'])->first()?->name ?? 'Unknown';
+                                $ticketAction->update([
+                                    'description' => $data['description'] . "\n\nTeknisi $technicianName ditugaskan untuk kunjungan ke lokasi."
+                                ]);
+                            }
+                        } elseif ($data['action_type'] === 'Start Clock') {
+                            $updates['status'] = 'OPEN';
                         } elseif ($data['action_type'] === 'Completed') {
                             $updates['status'] = 'CLOSED';
                             $updates['closed_date'] = now();
@@ -330,6 +379,101 @@ class ViewTicket extends ViewRecord
                         Notification::make()
                             ->danger()
                             ->title('Gagal memperbarui Resolution/Action')
+                            ->body($e->getMessage())
+                            ->send();
+                    }
+                }),
+            
+            // Add action to update assigned technician separately - modified without allowDeselection
+            \Filament\Actions\Action::make('updateTechnician')
+                ->label('Assign Teknisi')
+                ->color('info')
+                ->icon('heroicon-o-user-plus')
+                ->form([
+                    // Add an option to select "No technician" with a radio first
+                    \Filament\Forms\Components\Radio::make('technician_option')
+                        ->label('Opsi Teknisi')
+                        ->options([
+                            'none' => 'Tidak ada teknisi (hapus penugasan)',
+                            'assign' => 'Pilih teknisi untuk ditugaskan',
+                        ])
+                        ->default(function ($record) {
+                            return empty($record->assigned_to) ? 'none' : 'assign';
+                        })
+                        ->live(),
+                    
+                    \Filament\Forms\Components\Select::make('assigned_to')
+                        ->label('Pilih Teknisi')
+                        ->options(function () {
+                            return \App\Models\User::role('TEKNISI')
+                                ->get()
+                                ->mapWithKeys(function ($user) {
+                                    return [$user->email => $user->name];
+                                })
+                                ->toArray();
+                        })
+                        ->searchable()
+                        ->required(fn (\Filament\Forms\Get $get): bool => $get('technician_option') === 'assign')
+                        ->placeholder('Pilih teknisi')
+                        ->default(fn ($record) => $record->assigned_to)
+                        ->visible(fn (\Filament\Forms\Get $get): bool => $get('technician_option') === 'assign')
+                ])
+                ->action(function (array $data): void {
+                    try {
+                        $oldTechnician = $this->record->assigned_to;
+                        
+                        // Determine the new technician based on the radio selection
+                        $newTechnician = null;
+                        if ($data['technician_option'] === 'assign' && !empty($data['assigned_to'])) {
+                            $newTechnician = $data['assigned_to'];
+                        }
+                        
+                        // Update technician assignment
+                        $this->record->update([
+                            'assigned_to' => $newTechnician
+                        ]);
+                        
+                        // Create a ticket action to record this change
+                        $description = '';
+                        
+                        if (empty($oldTechnician) && !empty($newTechnician)) {
+                            // New assignment
+                            $technicianName = \App\Models\User::where('email', $newTechnician)->first()?->name ?? 'Unknown';
+                            $description = "Teknisi $technicianName ditugaskan untuk menangani tiket ini.";
+                        } elseif (!empty($oldTechnician) && empty($newTechnician)) {
+                            // Assignment removed
+                            $oldTechnicianName = \App\Models\User::where('email', $oldTechnician)->first()?->name ?? 'Unknown';
+                            $description = "Penugasan teknisi $oldTechnicianName dicabut.";
+                        } elseif (!empty($oldTechnician) && !empty($newTechnician) && $oldTechnician !== $newTechnician) {
+                            // Assignment changed
+                            $oldTechnicianName = \App\Models\User::where('email', $oldTechnician)->first()?->name ?? 'Unknown';
+                            $newTechnicianName = \App\Models\User::where('email', $newTechnician)->first()?->name ?? 'Unknown';
+                            $description = "Penugasan teknisi diubah dari $oldTechnicianName ke $newTechnicianName.";
+                        } else {
+                            // No change or same technician reassigned
+                            $description = "Tidak ada perubahan pada penugasan teknisi.";
+                        }
+                        
+                        if ($description !== "Tidak ada perubahan pada penugasan teknisi.") {
+                            TicketAction::create([
+                                'ticket_id' => $this->record->getKey(),
+                                'user_id' => Auth::user()->getKey(),
+                                'action_type' => 'Note',
+                                'description' => $description,
+                                'status' => $this->record->status
+                            ]);
+                        }
+
+                        Notification::make()
+                            ->success()
+                            ->title('Penugasan Teknisi Berhasil Diperbarui')
+                            ->send();
+
+                        $this->redirect($this->getResource()::getUrl('view', ['record' => $this->record->getKey()]));
+                    } catch (\Exception $e) {
+                        Notification::make()
+                            ->danger()
+                            ->title('Gagal memperbarui penugasan teknisi')
                             ->body($e->getMessage())
                             ->send();
                     }
