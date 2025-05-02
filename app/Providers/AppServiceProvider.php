@@ -23,6 +23,8 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Log::info('AppServiceProvider booted');
+
+        
         
         // Register observer here
         Ticket::observe(TicketObserver::class);

@@ -7,6 +7,7 @@ module.exports = {
         "./resources/**/*.js",
         "./resources/**/*.vue",
         "./vendor/filament/**/*.blade.php",
+        './vendor/kenepa/banner/resources/**/*.php',
     ],
     theme: {
         extend: {},

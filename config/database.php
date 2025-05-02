@@ -62,6 +62,16 @@ return [
             ]) : [],
         ],
 
+        'alfalaw' => [
+        'driver' => 'mysql',
+        'host' => env('DB_HOST', '127.0.0.1'), // Bisa gunakan host yang sama
+        'port' => env('DB_PORT', '3306'),
+        'database' => env('DB_ALFALAW_DATABASE', 'alfalaw'),
+        'username' => env('DB_USERNAME', 'root'), // Bisa gunakan username yang sama
+        'password' => env('DB_PASSWORD', ''),
+        // ...
+        ],
+
         'mariadb' => [
             'driver' => 'mariadb',
             'url' => env('DB_URL'),

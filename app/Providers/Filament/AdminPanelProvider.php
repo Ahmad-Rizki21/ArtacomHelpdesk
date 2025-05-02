@@ -29,7 +29,8 @@ use App\Filament\Widgets\BackboneTicketChartWidget;
 use Devonab\FilamentEasyFooter\EasyFooterPlugin;
 use Leandrocfe\FilamentApexCharts\FilamentApexChartsPlugin;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
-
+use Awcodes\FilamentStickyHeader\StickyHeaderPlugin;
+use Kenepa\Banner\BannerPlugin;
 
 use Filament\Navigation\NavigationGroup;
 use Filament\Navigation\NavigationItem;
@@ -50,9 +51,8 @@ class AdminPanelProvider extends PanelProvider
                 'success' => Color::Emerald,
                 'gray' => Color::Slate,
             ])
-            ->brandName('FTTH JELANTIK HELPDESK')
+            ->brandName('ARTACOM HELPDESK')
             ->darkMode(true)
-            
             ->navigationGroups([
                 NavigationGroup::make()->label('Helpdesk'),
                 NavigationGroup::make()->label('Backbone'),
@@ -80,6 +80,11 @@ class AdminPanelProvider extends PanelProvider
             
             // Consolidate plugin registration
             ->plugins([
+                // BannerPlugin::make()
+                // ->navigationIcon('heroicon-o-megaphone')
+                // ->navigationLabel('Banners')
+                // ->navigationGroup('Settings')
+                // ->navigationSort(1),
                 FilamentApexChartsPlugin::make(),
                 EasyFooterPlugin::make()
                     ->withBorder()
@@ -94,6 +99,12 @@ class AdminPanelProvider extends PanelProvider
                 
                 // Move Filament Shield plugin here
                 FilamentShieldPlugin::make(),
+
+                StickyHeaderPlugin::make()
+                ->floating()
+                ->colored()
+
+            
             ])
             
             // Remove duplicate resources block

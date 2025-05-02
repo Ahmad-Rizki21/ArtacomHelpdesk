@@ -106,3 +106,108 @@ Jika Anda menemukan kerentanan keamanan dalam Laravel, harap kirim e-mail ke Tay
 ## Lisensi
 
 Framework Laravel adalah perangkat lunak sumber terbuka yang dilisensikan di bawah [lisensi MIT](https://opensource.org/licenses/MIT).
+
+Catatan Perubahan Implementasi SLA untuk Helpdesk Ticket FTTH
+Perubahan yang Telah Dilakukan
+
+Penambahan Perhitungan SLA dengan Target Uptime 99,5%
+
+Implementasi konstanta TARGET_UPTIME_PERCENTAGE = 99.5 pada model Ticket
+Perhitungan menyesuaikan dengan jumlah hari dalam bulan (termasuk Februari vs bulan lain)
+
+
+Penambahan Method Perhitungan Waktu
+
+calculateTotalTimeInMonth(): Menghitung total menit dalam satu bulan
+calculateAllowedDowntimeInMonth(): Menghitung downtime maksimum yang diizinkan (0,5% dari total waktu)
+calculateResolutionTime(): Menghitung waktu resolusi tiket dengan memperhitungkan waktu pending
+calculateUptimePercentage(): Menghitung persentase uptime berdasarkan waktu resolusi
+
+
+Penambahan Atribut Model
+
+uptime_percentage: Persentase uptime tiket
+sla_status: Status SLA tiket (Memenuhi/Melebihi SLA)
+resolution_time: Waktu resolusi dalam format yang mudah dibaca
+allowed_downtime: Downtime maksimum yang diizinkan
+duration_in_days: Durasi tiket dalam format hari-jam-menit (dd hh)
+
+
+Penambahan Scope Query
+
+scopeMeetingSla(): Mendapatkan tiket yang memenuhi SLA
+scopeExceedingSla(): Mendapatkan tiket yang melebihi SLA
+scopeInMonth(): Mendapatkan tiket dalam bulan tertentu
+scopeFtth(): Mendapatkan tiket untuk layanan FTTH
+
+
+Penambahan Method Statistik
+
+getSlaStats(): Menghitung statistik SLA untuk periode tertentu
+
+
+Modifikasi Ekspor Excel
+
+Penambahan ringkasan statistik SLA
+Penambahan statistik bulanan
+Penambahan kolom Durasi (dd hh)
+Penambahan kolom Uptime Percentage
+Penambahan kolom Allowed Downtime
+Penambahan kolom SLA Status
+Styling untuk kolom-kolom baru
+
+
+
+Rincian File yang Diubah
+1. Model Ticket.php
+
+Penambahan konstanta dan properti untuk SLA
+Implementasi metode perhitungan SLA
+Implementasi getter untuk atribut baru
+Penambahan scope query untuk memudahkan filtering
+
+2. Kelas TicketsExport.php
+
+Modifikasi untuk menambahkan data SLA dalam ekspor
+Penambahan statistik SLA dalam header laporan
+Penambahan kolom untuk informasi SLA
+Penyesuaian styling untuk laporan yang lebih informatif
+
+Manfaat Implementasi
+
+Perhitungan SLA yang Akurat
+
+Memperhitungkan waktu pending dalam perhitungan SLA
+Menyesuaikan dengan jumlah hari dalam bulan
+Target uptime 99,5% sesuai standar perusahaan
+
+
+Analisis Performa Layanan
+
+Statistik bulanan membantu menganalisis tren performa
+Persentase kepatuhan SLA memberikan gambaran kualitas layanan
+
+
+Laporan yang Komprehensif
+
+Tampilan durasi dalam format hari-jam-menit memudahkan pembacaan
+Pewarnaan status membantu identifikasi cepat tiket bermasalah
+
+
+Fleksibilitas Query
+
+Scope query memudahkan filtering data untuk keperluan analisis lanjutan
+
+
+
+Catatan Penting
+
+Target SLA uptime diatur pada 99,5%. Jika ada perubahan kebijakan, cukup ubah nilai konstanta TARGET_UPTIME_PERCENTAGE pada model Ticket.
+Perhitungan memperhitungkan perbedaan jumlah hari dalam bulan, sehingga downtime maksimum yang diizinkan akan berbeda untuk Februari dibandingkan dengan bulan-bulan lainnya.
+Waktu pending tidak dihitung dalam durasi dan waktu resolusi tiket, sehingga hanya menghitung waktu aktif penanganan tiket.
+
+Pengembangan Lanjutan yang Dapat Dilakukan
+
+Dashboard analitik untuk pemantauan SLA real-time
+Notifikasi otomatis saat tiket mendekati atau melebihi batas SLA
+Integrasi dengan sistem pelaporan untuk memberikan insight tentang area layanan yang perlu peningkatan

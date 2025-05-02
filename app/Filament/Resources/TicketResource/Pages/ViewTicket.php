@@ -14,6 +14,8 @@ use Filament\Notifications\Notification;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Auth;
 use App\Models\TicketAction;
+use App\Filament\Components\TicketTimer;
+use Filament\Infolists\Components\Stack;
 
 class ViewTicket extends ViewRecord
 {
@@ -24,36 +26,60 @@ class ViewTicket extends ViewRecord
         return $infolist
             ->schema([
                 Section::make('Ticket Information')
-                    ->description('Details of the support ticket')
-                    ->schema([
-                        Grid::make(2)->schema([
-                            TextEntry::make('service')->label('Service'),
-                            TextEntry::make('ticket_number')->label('Ticket Number'),
-                        ]),
-                        Grid::make(2)->schema([
-                            TextEntry::make('customer.composite_data')->label('Customer'),
-                            TextEntry::make('sla.name')
-                                ->label('SLA')
-                                ->badge()
-                                ->color(fn ($state): string => match ($state) {
-                                    'HIGH' => 'danger',
-                                    'MEDIUM' => 'warning',
-                                    'LOW' => 'primary',
-                                    default => 'gray',
-                                }),
-                        ]),
-                        TextEntry::make('problem_summary')
+                ->description('Details of the support ticket')
+                ->schema([
+                    Grid::make(2)->schema([
+                        TextEntry::make('service')->label('Service'),
+                        TextEntry::make('ticket_number')->label('Ticket Number'),
+                    ]),
+        
+                // Kolom kiri untuk Customer dan SLA badge
+                Grid::make(2)->schema([
+                    // Kolom Customer dan SLA badge
+                    Infolists\Components\Group::make([
+                        TextEntry::make('customer.composite_data')
+                            ->label('Customer'),
+                        TextEntry::make('sla.name')
+                            ->label('SLA')
+                            ->badge()
+                            ->color(fn ($state): string => match ($state) {
+                                'HIGH' => 'danger',
+                                'MEDIUM' => 'warning',
+                                'LOW' => 'primary',
+                                default => 'gray',
+                            }),
+                            TextEntry::make('problem_summary')
                             ->label('Problem Summary')
                             ->badge()
                             ->color('primary'),
                         TextEntry::make('extra_description')
                             ->label('Extra Description')
                             ->markdown(),
-                    ]),
+                    ])->extraAttributes(['class' => 'space-y-1']),
+            
+                    // SLA Timer di kolom kanan
+                    TextEntry::make('sla_timer')
+                        ->label('SLA Timer')
+                        ->state(fn ($record) => true)
+                        ->formatStateUsing(function ($state, $record) {
+                            return new \Illuminate\Support\HtmlString(
+                                view('components.improved-sla-timer', [
+                                    'ticket' => $record,
+                                ])->render()
+                            );
+                        }),
+            ]),
+        
+        
+        ]),
 
-                Section::make('Ticket Status')
+                    Section::make('Ticket Status')
                     ->description('Current status and additional information')
                     ->schema([
+                        // SLA Timer dipindahkan ke sini (tepat di awal section 'Ticket Status')
+                        
+                        
+                        // Grid untuk Report Date dan Status dipindahkan ke bawah timer
                         Grid::make(2)->schema([
                             TextEntry::make('report_date')
                                 ->label('Report Date')
@@ -156,10 +182,12 @@ class ViewTicket extends ViewRecord
                                         'Completed' => 'gray',
                                         default => 'secondary',
                                     }),
-                                TextEntry::make('description')
+                                    TextEntry::make('description')
                                     ->columnSpan(2)
                                     ->formatStateUsing(fn($state) =>
-                                        new HtmlString('<pre style="font-family:monospace;font-size:14px;background:#222;color:#fff;border-radius:8px;padding:8px;">'.e($state).'</pre>')
+                                        new HtmlString('<pre style="font-family:monospace;font-size:14px;background:#222;color:#fff;border-radius:8px;padding:12px;margin:0;white-space:pre-wrap;word-break:break-word;max-width:100%;overflow-x:auto;">' . 
+                                            e($state) . 
+                                        '</pre>')
                                     ),
                                 TextEntry::make('created_at')
                                     ->dateTime()
@@ -186,6 +214,14 @@ class ViewTicket extends ViewRecord
                         TextEntry::make('creator.name')->label('Created By'),
                     ]),
             ]);
+    }
+
+    // Metode untuk merender TicketTimer di luar infolist
+    protected function renderTicketTimer()
+    {
+        return TicketTimer::make()
+            ->ticket($this->record)
+            ->render();
     }
 
     protected function getHeaderActions(): array
@@ -238,7 +274,8 @@ class ViewTicket extends ViewRecord
                         ->required()
                         ->helperText(function (\Filament\Forms\Get $get) {
                             if ($get('action_type') === 'Completed') {
-                                return 'Deskripsi ini akan otomatis mengisi field Resolution/Action pada ticket';
+                                return 'Deskripsi ini akan otomatis mengisi field Resolution/Action pada ticket,
+                                        Completed AKAN OTOMATIS CLOSED TICKET, Jika ingin menambah Prgress Silahkan di Catatan/Tindakan.';
                             }
                             return 'Bisa copy-paste hasil ping, akan tampil sesuai baris.';
                         }),
@@ -354,7 +391,7 @@ class ViewTicket extends ViewRecord
                                     'ticket_id' => $this->record->getKey(),
                                     'user_id' => Auth::user()->getKey(),
                                     'action_type' => 'Completed',
-                                    'description' => $data['action_description'],
+                                    'description' => $data['action_description (BERSIFAT LANGSUNG CLOSED)'],
                                     'status' => 'CLOSED'
                                 ]);
                             }
