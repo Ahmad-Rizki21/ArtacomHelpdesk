@@ -60,16 +60,37 @@ class AdminPanelProvider extends PanelProvider
                 NavigationGroup::make()->label('System'),
             ])
             
+            // Dashboard tetap didaftarkan melalui pages
+            ->pages([
+                Pages\Dashboard::class,
+            ])
+            
+            // Menggunakan navigationItems dengan childItems untuk Panel Switcher
+            ->navigationItems([
+                // Panel Switcher dengan dropdown
+                NavigationItem::make()
+                    ->label('Panel Switcher')
+                    ->icon('heroicon-o-squares-2x2')
+                    ->sort(10) // Nilai sort yang lebih tinggi dari Dashboard (biasanya Dashboard adalah 0)
+                    ->childItems([
+                        NavigationItem::make()
+                            ->label('FTTH HELPDESK TICKET')
+                            ->url('/admin')
+                            ->icon('heroicon-o-check-circle')
+                            ->isActiveWhen(fn (): bool => request()->is('admin*')),
+                        NavigationItem::make()
+                            ->label('ALFA LAWSON HELPDESK')
+                            ->url('/alfaLawson')
+                            ->icon('heroicon-o-arrow-right-circle'),
+                    ]),
+            ])
+            
             ->resources([
                 TicketResource::class,
                 config('filament-logger.activity_resource'),
             ])
             
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
-            
-            ->pages([
-                Pages\Dashboard::class,
-            ])
             
             ->widgets([
                 TicketStatsWidget::class,
@@ -78,13 +99,8 @@ class AdminPanelProvider extends PanelProvider
                 BackboneTicketChartWidget::class,
             ])
             
-            // Consolidate plugin registration
+            // Plugin registration
             ->plugins([
-                // BannerPlugin::make()
-                // ->navigationIcon('heroicon-o-megaphone')
-                // ->navigationLabel('Banners')
-                // ->navigationGroup('Settings')
-                // ->navigationSort(1),
                 FilamentApexChartsPlugin::make(),
                 EasyFooterPlugin::make()
                     ->withBorder()
@@ -97,17 +113,13 @@ class AdminPanelProvider extends PanelProvider
                     ])
                     ->withLoadTime('This page loaded in'),
                 
-                // Move Filament Shield plugin here
                 FilamentShieldPlugin::make(),
 
                 StickyHeaderPlugin::make()
-                ->floating()
-                ->colored()
-
-            
+                    ->floating()
+                    ->colored()
             ])
             
-            // Remove duplicate resources block
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
