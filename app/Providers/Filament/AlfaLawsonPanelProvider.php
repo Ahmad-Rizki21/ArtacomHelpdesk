@@ -8,6 +8,7 @@ use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Navigation\NavigationItem;
+
 use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
@@ -22,6 +23,9 @@ use Leandrocfe\FilamentApexCharts\FilamentApexChartsPlugin;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Awcodes\FilamentStickyHeader\StickyHeaderPlugin;
 use Devonab\FilamentEasyFooter\EasyFooterPlugin;
+
+// Import resource AlfaLawson
+use App\Filament\AlfaLawson\Resources\CustomerResource;
 
 class AlfaLawsonPanelProvider extends PanelProvider
 {
@@ -41,6 +45,20 @@ class AlfaLawsonPanelProvider extends PanelProvider
                 'info' => Color::Blue,
                 'gray' => Color::Slate,
             ])
+            
+            
+            // Daftarkan resource secara eksplisit
+            ->resources([
+                CustomerResource::class,
+                // Tambahkan resource lain di sini jika ada
+                // ProductResource::class,
+                // OrderResource::class,
+            ])
+            
+            // Discovery resources
+            ->discoverResources(in: app_path('Filament/AlfaLawson/Resources'), for: 'App\\Filament\\AlfaLawson\\Resources')
+            ->discoverPages(in: app_path('Filament/AlfaLawson/Pages'), for: 'App\\Filament\\AlfaLawson\\Pages')
+            ->discoverWidgets(in: app_path('Filament/AlfaLawson/Widgets'), for: 'App\\Filament\\AlfaLawson\\Widgets')
 
             ->navigationItems([
                 NavigationItem::make()
@@ -54,7 +72,7 @@ class AlfaLawsonPanelProvider extends PanelProvider
                             ->label('ALFA LAWSON HELPDESK')
                             ->url('/alfaLawson')
                             ->icon('heroicon-o-arrow-right-circle')
-                            ->isActiveWhen(fn () => request()->is('alfa*')),
+                            ->isActiveWhen(fn () => request()->is('alfaLawson*')),
                         NavigationItem::make()
                             ->label('FTTH HELPDESK TICKET')
                             ->url('/admin')
@@ -75,8 +93,7 @@ class AlfaLawsonPanelProvider extends PanelProvider
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
             ])
-             // Plugin registration
-             ->plugins([
+            ->plugins([
                 FilamentApexChartsPlugin::make(),
                 EasyFooterPlugin::make()
                     ->withBorder()

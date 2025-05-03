@@ -15,6 +15,7 @@ class SLAResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
     protected static ?string $navigationLabel = 'SLA';
     protected static ?string $navigationGroup = 'Helpdesk';
+    
 
     public static function form(Forms\Form $form): Forms\Form
     {

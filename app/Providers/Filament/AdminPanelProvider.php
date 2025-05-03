@@ -71,7 +71,8 @@ class AdminPanelProvider extends PanelProvider
                 NavigationItem::make()
                     ->label('Panel Switcher')
                     ->icon('heroicon-o-squares-2x2')
-                    ->sort(10) // Nilai sort yang lebih tinggi dari Dashboard (biasanya Dashboard adalah 0)
+                    ->sort(-1) // Nilai sort yang lebih tinggi dari Dashboard (biasanya Dashboard adalah 0)
+                    ->group('Panel Switcher')
                     ->childItems([
                         NavigationItem::make()
                             ->label('FTTH HELPDESK TICKET')

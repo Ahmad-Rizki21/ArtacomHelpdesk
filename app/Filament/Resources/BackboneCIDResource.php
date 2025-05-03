@@ -20,6 +20,7 @@ class BackboneCIDResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-clipboard';
     protected static ?string $navigationLabel = 'Backbone CIDs';
     protected static ?string $navigationGroup = 'Backbone';
+    
 
 
     public static function form(Forms\Form $form): Forms\Form

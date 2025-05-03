@@ -36,6 +36,7 @@ class TicketBackboneResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-ticket';
     protected static ?string $navigationLabel = 'Ticket Backbone';
     protected static ?string $navigationGroup = 'Backbone';
+    
 
     public static function form(Form $form): Form
     {
