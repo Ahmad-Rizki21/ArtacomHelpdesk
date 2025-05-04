@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Builder;
 use App\Models\Ticket;
 use Filament\Support\Enums\IconPosition;
 use Filament\Resources\Components\Tab;
+use Carbon\Carbon;
 
 class ListTickets extends ListRecords
 {
@@ -80,12 +81,53 @@ class ListTickets extends ListRecords
         ];
     }
 
+    // public function exportFilteredData()
+    // {
+    //     // Ambil query dari tabel dengan filter yang diterapkan
+    //     $query = $this->getFilteredQuery();
+
+    //     // Cek apakah ada data yang difilter
+    //     if ($query->count() === 0) {
+    //         Notification::make()
+    //             ->title('Tidak ada data yang difilter.')
+    //             ->warning()
+    //             ->send();
+    //         return null;
+    //     }
+
+    //     // Ambil data hasil filter
+    //     $tickets = $query->get();
+
+    //     // Buat nama file berdasarkan filter
+    //     $fileName = "laporan_tickets";
+        
+    //     // Ambil nilai filter dengan cara yang lebih aman
+    //     $periodFilter = $this->tableFilters['created_at_period'] ?? [];
+    //     $year = $periodFilter['year'] ?? null;
+    //     $month = $periodFilter['month'] ?? null;
+        
+    //     // Filter status - ambil nilai dengan aman
+    //     $statusFilter = $this->tableFilters['status'] ?? [];
+    //     $status = $statusFilter['value'] ?? null;
+        
+    //     // Filter problem - ambil nilai dengan aman
+    //     $problemFilter = $this->tableFilters['problem_summary'] ?? [];
+    //     $problemType = is_array($problemFilter) ? ($problemFilter['value'] ?? null) : $problemFilter;
+        
+    //     // Tambahkan ke nama file jika ada nilai
+    //     if ($year) $fileName .= "_{$year}";
+    //     if ($month) $fileName .= "_{$month}";
+    //     if ($status) $fileName .= "_{$status}";
+    //     if ($problemType) $fileName .= "_{$problemType}";
+    //     $fileName .= ".xlsx";
+
+    //     // Ekspor data ke Excel
+    //     return Excel::download(new TicketsExport($tickets), $fileName);
+    // }
     public function exportFilteredData()
     {
-        // Ambil query dari tabel dengan filter yang diterapkan
         $query = $this->getFilteredQuery();
 
-        // Cek apakah ada data yang difilter
         if ($query->count() === 0) {
             Notification::make()
                 ->title('Tidak ada data yang difilter.')
@@ -94,33 +136,30 @@ class ListTickets extends ListRecords
             return null;
         }
 
-        // Ambil data hasil filter
         $tickets = $query->get();
 
-        // Buat nama file berdasarkan filter
+        // Create filename based on filters
         $fileName = "laporan_tickets";
         
-        // Ambil nilai filter dengan cara yang lebih aman
-        $periodFilter = $this->tableFilters['created_at_period'] ?? [];
-        $year = $periodFilter['year'] ?? null;
-        $month = $periodFilter['month'] ?? null;
+        // Get date range filter values
+        $dateFilter = $this->tableFilters['created_at'] ?? [];
+        $from = $dateFilter['created_from'] ?? null;
+        $until = $dateFilter['created_until'] ?? null;
         
-        // Filter status - ambil nilai dengan aman
+        if ($from) $fileName .= "_from_" . Carbon::parse($from)->format('Y-m-d');
+        if ($until) $fileName .= "_to_" . Carbon::parse($until)->format('Y-m-d');
+        
+        // Add other filters to filename
         $statusFilter = $this->tableFilters['status'] ?? [];
         $status = $statusFilter['value'] ?? null;
         
-        // Filter problem - ambil nilai dengan aman
         $problemFilter = $this->tableFilters['problem_summary'] ?? [];
         $problemType = is_array($problemFilter) ? ($problemFilter['value'] ?? null) : $problemFilter;
         
-        // Tambahkan ke nama file jika ada nilai
-        if ($year) $fileName .= "_{$year}";
-        if ($month) $fileName .= "_{$month}";
         if ($status) $fileName .= "_{$status}";
         if ($problemType) $fileName .= "_{$problemType}";
         $fileName .= ".xlsx";
 
-        // Ekspor data ke Excel
         return Excel::download(new TicketsExport($tickets), $fileName);
     }
 
@@ -145,75 +184,139 @@ class ListTickets extends ListRecords
         $this->updateFiltersStatus();
     }
 
+    // protected function updateFiltersStatus(): void
+    // {
+    //     // Periksa apakah ada filter yang telah dipilih
+    //     $this->hasActiveFilters = false;
+        
+    //     if (isset($this->tableFilters['created_at_period'])) {
+    //         $periodFilter = $this->tableFilters['created_at_period'];
+    //         if (!empty($periodFilter['year']) || !empty($periodFilter['month'])) {
+    //             $this->hasActiveFilters = true;
+    //         }
+    //     }
+        
+    //     if (isset($this->tableFilters['status']) && !empty($this->tableFilters['status']['value'])) {
+    //         $this->hasActiveFilters = true;
+    //     }
+        
+    //     if (isset($this->tableFilters['problem_summary'])) {
+    //         $problemFilter = $this->tableFilters['problem_summary'];
+    //         if (is_array($problemFilter) && !empty($problemFilter['value'])) {
+    //             $this->hasActiveFilters = true;
+    //         } elseif (!is_array($problemFilter) && !empty($problemFilter)) {
+    //             $this->hasActiveFilters = true;
+    //         }
+    //     }
+    // }
+
     protected function updateFiltersStatus(): void
-    {
-        // Periksa apakah ada filter yang telah dipilih
-        $this->hasActiveFilters = false;
-        
-        if (isset($this->tableFilters['created_at_period'])) {
-            $periodFilter = $this->tableFilters['created_at_period'];
-            if (!empty($periodFilter['year']) || !empty($periodFilter['month'])) {
-                $this->hasActiveFilters = true;
-            }
-        }
-        
-        if (isset($this->tableFilters['status']) && !empty($this->tableFilters['status']['value'])) {
+{
+    $this->hasActiveFilters = false;
+    
+    // Check for periode date filter
+    if (isset($this->tableFilters['periode'])) {
+        $periodeFilter = $this->tableFilters['periode'];
+        if (!empty($periodeFilter['start_date']) || !empty($periodeFilter['end_date'])) {
             $this->hasActiveFilters = true;
         }
-        
-        if (isset($this->tableFilters['problem_summary'])) {
-            $problemFilter = $this->tableFilters['problem_summary'];
-            if (is_array($problemFilter) && !empty($problemFilter['value'])) {
-                $this->hasActiveFilters = true;
-            } elseif (!is_array($problemFilter) && !empty($problemFilter)) {
-                $this->hasActiveFilters = true;
-            }
+    }
+    
+    // Check for other filters (existing code)
+    if (isset($this->tableFilters['status']) && !empty($this->tableFilters['status']['value'])) {
+        $this->hasActiveFilters = true;
+    }
+    
+    if (isset($this->tableFilters['problem_summary'])) {
+        $problemFilter = $this->tableFilters['problem_summary'];
+        if (is_array($problemFilter) && !empty($problemFilter['value'])) {
+            $this->hasActiveFilters = true;
+        } elseif (!is_array($problemFilter) && !empty($problemFilter)) {
+            $this->hasActiveFilters = true;
         }
     }
+}
+
+
 
     /**
      * Ambil query yang sudah difilter dari tabel.
      *
      * @return Builder
      */
-    protected function getFilteredQuery(): Builder
-    {
-        // Gunakan $this->getTable()->getQuery() sebagai pengganti getTableQuery() yang deprecated
-        $query = $this->getTable()->getQuery();
+    // protected function getFilteredQuery(): Builder
+    // {
+    //     // Gunakan $this->getTable()->getQuery() sebagai pengganti getTableQuery() yang deprecated
+    //     $query = $this->getTable()->getQuery();
 
-        // Terapkan filter tambahan jika ada
+    //     // Terapkan filter tambahan jika ada
         
-        // Filter berdasarkan status jika ada
-        if (isset($this->tableFilters['status']) && !empty($this->tableFilters['status']['value'])) {
-            $status = $this->tableFilters['status']['value'];
-            $query->where('status', $status);
-        }
+    //     // Filter berdasarkan status jika ada
+    //     if (isset($this->tableFilters['status']) && !empty($this->tableFilters['status']['value'])) {
+    //         $status = $this->tableFilters['status']['value'];
+    //         $query->where('status', $status);
+    //     }
         
-        // Filter berdasarkan problem summary jika ada
-        if (isset($this->tableFilters['problem_summary'])) {
-            $problemFilter = $this->tableFilters['problem_summary'];
-            if (is_array($problemFilter) && !empty($problemFilter['value'])) {
-                $query->where('problem_summary', $problemFilter['value']);
-            } elseif (!is_array($problemFilter) && !empty($problemFilter)) {
-                $query->where('problem_summary', $problemFilter);
-            }
-        }
+    //     // Filter berdasarkan problem summary jika ada
+    //     if (isset($this->tableFilters['problem_summary'])) {
+    //         $problemFilter = $this->tableFilters['problem_summary'];
+    //         if (is_array($problemFilter) && !empty($problemFilter['value'])) {
+    //             $query->where('problem_summary', $problemFilter['value']);
+    //         } elseif (!is_array($problemFilter) && !empty($problemFilter)) {
+    //             $query->where('problem_summary', $problemFilter);
+    //         }
+    //     }
         
-        // Filter berdasarkan periode
-        if (isset($this->tableFilters['created_at_period'])) {
-            $periodFilter = $this->tableFilters['created_at_period'];
+    //     // Filter berdasarkan periode
+    //     if (isset($this->tableFilters['created_at_period'])) {
+    //         $periodFilter = $this->tableFilters['created_at_period'];
             
-            if (!empty($periodFilter['year'])) {
-                $query->whereYear('created_at', $periodFilter['year']);
-            }
+    //         if (!empty($periodFilter['year'])) {
+    //             $query->whereYear('created_at', $periodFilter['year']);
+    //         }
             
-            if (!empty($periodFilter['month'])) {
-                $query->whereMonth('created_at', $periodFilter['month']);
-            }
-        }
+    //         if (!empty($periodFilter['month'])) {
+    //             $query->whereMonth('created_at', $periodFilter['month']);
+    //         }
+    //     }
         
-        return $query;
+    //     return $query;
+    // }
+    protected function getFilteredQuery(): Builder
+{
+    $query = $this->getTable()->getQuery();
+
+    // Apply status filter
+    if (isset($this->tableFilters['status']) && !empty($this->tableFilters['status']['value'])) {
+        $status = $this->tableFilters['status']['value'];
+        $query->where('status', $status);
     }
+    
+    // Apply problem summary filter
+    if (isset($this->tableFilters['problem_summary'])) {
+        $problemFilter = $this->tableFilters['problem_summary'];
+        if (is_array($problemFilter) && !empty($problemFilter['value'])) {
+            $query->where('problem_summary', $problemFilter['value']);
+        } elseif (!is_array($problemFilter) && !empty($problemFilter)) {
+            $query->where('problem_summary', $problemFilter);
+        }
+    }
+    
+    // Apply periode filter
+    if (isset($this->tableFilters['periode'])) {
+        $periodeFilter = $this->tableFilters['periode'];
+        
+        if (!empty($periodeFilter['start_date'])) {
+            $query->whereDate('created_at', '>=', $periodeFilter['start_date']);
+        }
+        
+        if (!empty($periodeFilter['end_date'])) {
+            $query->whereDate('created_at', '<=', $periodeFilter['end_date']);
+        }
+    }
+    
+    return $query;
+}
 
     protected function getTableFiltersFormColumns(): int
     {
@@ -260,6 +363,8 @@ class ListTickets extends ListRecords
             return 'Tiket tidak ditemukan. Silakan coba filter lain atau buat tiket baru.';
         }
     }
+
+    
 
     protected function getTableEmptyStateActions(): array
     {

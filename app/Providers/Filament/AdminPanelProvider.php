@@ -54,6 +54,7 @@ class AdminPanelProvider extends PanelProvider
                 'success' => Color::Emerald,
                 'gray' => Color::Slate,
                 ])
+            
             ->brandName('ARTACOM HELPDESK')
             ->favicon(asset('images/Favicon.png'))
             

@@ -26,6 +26,7 @@ use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Collection;
+use Filament\Forms\Components\DatePicker;
 
 class TicketResource extends Resource
 {
@@ -40,6 +41,7 @@ class TicketResource extends Resource
     {
         return static::getModel()::whereIn('status', ['OPEN', 'PENDING'])->count();
     }
+    
     
     public static function getNavigationBadgeColor(): ?string
     {
@@ -249,6 +251,7 @@ class TicketResource extends Resource
     {
         return $table
             ->columns([
+                
                 TextColumn::make('ticket_number')
                     ->label('Ticket No')
                     ->searchable()
@@ -345,6 +348,38 @@ class TicketResource extends Resource
                         return $state;
                     }),
 
+                    
+                //LAPORAN SLA
+                
+                // Tambahkan kolom-kolom SLA
+            //     TextColumn::make('duration_in_days')
+            //     ->label('Durasi (d hh:mm)')
+            //     ->sortable()
+            //     ->searchable()
+            //     ->placeholder('Belum Selesai'),
+                
+            // TextColumn::make('uptime_percentage')
+            //     ->label('Uptime (%)')
+            //     ->sortable()
+            //     ->formatStateUsing(fn ($state) => $state ? number_format($state, 2) . '%' : 'N/A'),
+                
+            // TextColumn::make('allowed_downtime')
+            //     ->label('Downtime Maks')
+            //     ->sortable(),
+                
+            // TextColumn::make('sla_status')
+            //     ->label('Status SLA')
+            //     ->badge()
+            //     ->color(fn (string $state): string => match ($state) {
+            //         'Memenuhi SLA' => 'success',
+            //         'Melebihi SLA' => 'danger',
+            //         'Dalam Proses' => 'gray',
+            //         default => 'gray',
+            //     })
+            //     ->sortable(),
+            
+            
+
                 // Ubah kolom technician.name menjadi assigned_to
                 TextColumn::make('assigned_to')
                 ->label('Assigned To')
@@ -385,6 +420,60 @@ class TicketResource extends Resource
                     ->sortable()
                     ->searchable(),
             ])
+            
+            ->defaultSort('created_at', 'desc')
+            ->striped()
+        ->poll('10s') // Auto refresh setiap 10 detik
+            // ->filters([
+            //     SelectFilter::make('status')
+            //         ->label('Filter Status')
+            //         ->options([
+            //             'OPEN' => 'OPEN',
+            //             'PENDING' => 'PENDING',
+            //             'CLOSED' => 'CLOSED',
+            //         ]),
+            //     Filter::make('created_at_period')
+            //         ->label('Filter by Period')
+            //         ->form([
+            //             Forms\Components\Select::make('year')
+            //                 ->label('Year')
+            //                 ->options(
+            //                     collect(range(2022, now()->year))
+            //                         ->reverse()
+            //                         ->mapWithKeys(fn ($year) => [$year => $year])
+            //                 ),
+            //             Forms\Components\Select::make('month')
+            //                 ->label('Month')
+            //                 ->options([
+            //                     '01' => 'January',
+            //                     '02' => 'February',
+            //                     '03' => 'March',
+            //                     '04' => 'April',
+            //                     '05' => 'May',
+            //                     '06' => 'June',
+            //                     '07' => 'July',
+            //                     '08' => 'August',
+            //                     '09' => 'September',
+            //                     '10' => 'October',
+            //                     '11' => 'November',
+            //                     '12' => 'December',
+            //                 ]),
+
+            //         ])
+            //         ->query(fn (Builder $query, array $data) => $query
+            //             ->when($data['year'], fn ($q) => $q->whereYear('created_at', $data['year']))
+            //             ->when($data['month'], fn ($q) => $q->whereMonth('created_at', $data['month']))
+            //         ),
+                
+            //     SelectFilter::make('problem_summary')
+            //         ->label('Problem Type')
+            //         ->options([
+            //             'INDIKATOR LOS' => 'INDIKATOR LOS',
+            //             'LOW SPEED' => 'LOW SPEED',
+            //             'MODEM HANG' => 'MODEM HANG',
+            //             'NO INTERNET ACCESS' => 'NO INTERNET ACCESS',
+            //         ]),
+            // ])
             ->defaultSort('created_at', 'desc')
             ->filters([
                 SelectFilter::make('status')
@@ -394,38 +483,51 @@ class TicketResource extends Resource
                         'PENDING' => 'PENDING',
                         'CLOSED' => 'CLOSED',
                     ]),
-                Filter::make('created_at_period')
-                    ->label('Filter by Period')
+                
+                // Date picker dengan tampilan yang lebih kompak
+                Filter::make('periode')
                     ->form([
-                        Forms\Components\Select::make('year')
-                            ->label('Year')
-                            ->options(
-                                collect(range(2022, now()->year))
-                                    ->reverse()
-                                    ->mapWithKeys(fn ($year) => [$year => $year])
-                            ),
-                        Forms\Components\Select::make('month')
-                            ->label('Month')
-                            ->options([
-                                '01' => 'January',
-                                '02' => 'February',
-                                '03' => 'March',
-                                '04' => 'April',
-                                '05' => 'May',
-                                '06' => 'June',
-                                '07' => 'July',
-                                '08' => 'August',
-                                '09' => 'September',
-                                '10' => 'October',
-                                '11' => 'November',
-                                '12' => 'December',
-                            ]),
-
+                        Grid::make(2)
+                            ->schema([
+                                DatePicker::make('start_date')
+                                    ->label('Dari Tanggal')
+                                    ->displayFormat('d M Y')
+                                    ->native(false)
+                                    ->closeOnDateSelection()
+                                    ->maxDate(now())
+                                    ->placeholder('Pilih Tanggal'),
+                                    
+                                DatePicker::make('end_date')
+                                    ->label('Sampai Tanggal')
+                                    ->displayFormat('d M Y')
+                                    ->native(false)
+                                    ->closeOnDateSelection()
+                                    ->maxDate(now())
+                                    ->placeholder('Pilih Tanggal')
+                            ])
+                            ->columns(2)
                     ])
-                    ->query(fn (Builder $query, array $data) => $query
-                        ->when($data['year'], fn ($q) => $q->whereYear('created_at', $data['year']))
-                        ->when($data['month'], fn ($q) => $q->whereMonth('created_at', $data['month']))
-                    ),
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['start_date'],
+                                fn (Builder $query, $date): Builder => $query->whereDate('created_at', '>=', $date),
+                            )
+                            ->when(
+                                $data['end_date'],
+                                fn (Builder $query, $date): Builder => $query->whereDate('created_at', '<=', $date),
+                            );
+                    })
+                    ->indicateUsing(function (array $data): array {
+                        $indicators = [];
+                        if ($data['start_date'] ?? null) {
+                            $indicators[] = 'Dari: ' . Carbon::parse($data['start_date'])->format('d M Y');
+                        }
+                        if ($data['end_date'] ?? null) {
+                            $indicators[] = 'Sampai: ' . Carbon::parse($data['end_date'])->format('d M Y');
+                        }
+                        return $indicators;
+                    }),
                 
                 SelectFilter::make('problem_summary')
                     ->label('Problem Type')
@@ -436,6 +538,8 @@ class TicketResource extends Resource
                         'NO INTERNET ACCESS' => 'NO INTERNET ACCESS',
                     ]),
             ])
+            ->filtersLayout(Tables\Enums\FiltersLayout::AboveContent)
+            ->filtersFormColumns(3)
             ->actions([
                 Tables\Actions\ViewAction::make()
                     ->color('info'),
