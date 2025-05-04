@@ -18,6 +18,7 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Illuminate\Contracts\View\View;
 use App\Filament\Resources\TicketResource;
 use App\Filament\Resources\TicketBackboneResource;
 use App\Filament\Resources\LogActivityResource;
@@ -52,8 +53,15 @@ class AdminPanelProvider extends PanelProvider
                 'warning' => Color::Orange,
                 'success' => Color::Emerald,
                 'gray' => Color::Slate,
-            ])
+                ])
             ->brandName('ARTACOM HELPDESK')
+            ->favicon(asset('images/Favicon.png'))
+            
+            ->brandLogo(asset('images/LightMode-Logo.png'))
+            ->darkModeBrandLogo(asset('images/DarkMode-Logo1.png'))
+
+            ->brandLogoHeight(fn () => \Illuminate\Support\Facades\Auth::check() ? '3.5rem' : '9rem')
+            
             ->darkMode(true)
             ->navigationGroups([
                 NavigationGroup::make()->label('Helpdesk'),

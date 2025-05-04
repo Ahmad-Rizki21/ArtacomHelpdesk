@@ -46,6 +46,14 @@ class AlfaLawsonPanelProvider extends PanelProvider
                 'info' => Color::Blue,
                 'gray' => Color::Slate,
             ])
+
+            ->brandName('ARTACOM HELPDESK')
+            ->favicon(asset('images/Favicon.png'))
+            
+            ->brandLogo(asset('images/LightMode-Logo.png'))
+            ->darkModeBrandLogo(asset('images/DarkMode-Logo1.png'))
+
+            ->brandLogoHeight(fn () => \Illuminate\Support\Facades\Auth::check() ? '3.5rem' : '9rem')
             
             
             // Daftarkan resource secara eksplisit
