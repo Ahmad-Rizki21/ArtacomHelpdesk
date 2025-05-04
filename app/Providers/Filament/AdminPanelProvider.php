@@ -31,9 +31,11 @@ use Leandrocfe\FilamentApexCharts\FilamentApexChartsPlugin;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Awcodes\FilamentStickyHeader\StickyHeaderPlugin;
 use Kenepa\Banner\BannerPlugin;
+use Andreia\FilamentNordTheme\FilamentNordThemePlugin;
 
 use Filament\Navigation\NavigationGroup;
 use Filament\Navigation\NavigationItem;
+use CharrafiMed\GlobalSearchModal\GlobalSearchModalPlugin;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -102,6 +104,7 @@ class AdminPanelProvider extends PanelProvider
             
             // Plugin registration
             ->plugins([
+                FilamentNordThemePlugin::make(),
                 FilamentApexChartsPlugin::make(),
                 EasyFooterPlugin::make()
                     ->withBorder()
@@ -116,6 +119,9 @@ class AdminPanelProvider extends PanelProvider
                 
                 FilamentShieldPlugin::make(),
 
+                GlobalSearchModalPlugin::make()
+                ->scopes(UserResource::class),
+                
                 StickyHeaderPlugin::make()
                     ->floating()
                     ->colored()

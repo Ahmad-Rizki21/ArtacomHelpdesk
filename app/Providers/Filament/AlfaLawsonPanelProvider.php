@@ -8,6 +8,7 @@ use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Navigation\NavigationItem;
+use Andreia\FilamentNordTheme\FilamentNordThemePlugin;
 
 use Filament\Pages;
 use Filament\Panel;
@@ -94,6 +95,7 @@ class AlfaLawsonPanelProvider extends PanelProvider
                 DispatchServingFilamentEvent::class,
             ])
             ->plugins([
+                FilamentNordThemePlugin::make(),
                 FilamentApexChartsPlugin::make(),
                 EasyFooterPlugin::make()
                     ->withBorder()
