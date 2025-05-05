@@ -27,6 +27,7 @@ use Devonab\FilamentEasyFooter\EasyFooterPlugin;
 
 // Import resource AlfaLawson
 use App\Filament\AlfaLawson\Resources\CustomerResource;
+use Swis\Filament\Backgrounds\FilamentBackgroundsPlugin;
 
 class AlfaLawsonPanelProvider extends PanelProvider
 {
@@ -104,6 +105,8 @@ class AlfaLawsonPanelProvider extends PanelProvider
             ])
             ->plugins([
                 FilamentNordThemePlugin::make(),
+                FilamentBackgroundsPlugin::make()
+                ->showAttribution(false),
                 FilamentApexChartsPlugin::make(),
                 EasyFooterPlugin::make()
                     ->withBorder()

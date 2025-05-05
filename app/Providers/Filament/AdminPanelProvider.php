@@ -37,6 +37,8 @@ use Andreia\FilamentNordTheme\FilamentNordThemePlugin;
 use Filament\Navigation\NavigationGroup;
 use Filament\Navigation\NavigationItem;
 use CharrafiMed\GlobalSearchModal\GlobalSearchModalPlugin;
+use Swis\Filament\Backgrounds\FilamentBackgroundsPlugin;
+use Swis\Filament\Backgrounds\ImageProviders\MyImages;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -127,6 +129,14 @@ class AdminPanelProvider extends PanelProvider
                     ->withLoadTime('This page loaded in'),
                 
                 FilamentShieldPlugin::make(),
+
+                FilamentBackgroundsPlugin::make()
+                ->showAttribution(false),
+                // FilamentBackgroundsPlugin::make()
+                // ->imageProvider(
+                //     MyImages::make()
+                //         ->directory('images/logobg')
+                // ),
 
                 GlobalSearchModalPlugin::make()
                 ->scopes(UserResource::class),

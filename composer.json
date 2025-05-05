@@ -9,6 +9,7 @@
         "php": "^8.2",
         "andreia/filament-nord-theme": "^1.0",
         "awcodes/filament-sticky-header": "^2.0",
+        "aymanalhattami/filament-slim-scrollbar": "^2.1",
         "barryvdh/laravel-dompdf": "^3.1",
         "bezhansalleh/filament-shield": "^3.3",
         "charrafimed/global-search-modal": "^3.7",
@@ -29,6 +30,7 @@
         "pxlrbt/filament-excel": "^2.4",
         "spatie/laravel-activitylog": "^4.9",
         "spatie/laravel-permission": "^6.13",
+        "swisnl/filament-backgrounds": "^1.1",
         "z3d0x/filament-logger": "^0.8.0"
     },
     "require-dev": {
