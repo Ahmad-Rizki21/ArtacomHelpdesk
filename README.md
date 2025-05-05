@@ -1,19 +1,17 @@
+
 <p align="center">
   <a href="https://laravel.com" target="_blank">
-    <img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo">
+    <img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="300" alt="Laravel Logo">
   </a>
 </p>
 
 <p align="center">
-<<<<<<< HEAD
-=======
-  <a href="https://filamentphp.com" target="_blank">
-    <img src="https://www.luckymedia.dev/img/blog/why-do-we-use-filamentphp/filament-logo.svg" width="400" alt="Filament Logo">
+  <a href="https://filamentphp.com/" target="_blank">
+    <img src="https://www.fedrianto.com/content/images/2022/11/131910226-676cb28a-332d-4162-a6a8-136a93d5a70f.png" width="280" alt="Filament Logo">
   </a>
 </p>
 
 <p align="center">
->>>>>>> a9f896909da5627a95aee035ec98b12d61dc5434
   <a href="https://github.com/laravel/framework/actions">
     <img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status">
   </a>
@@ -21,193 +19,121 @@
     <img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads">
   </a>
   <a href="https://packagist.org/packages/laravel/framework">
-    <img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version">
+    <img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Version">
   </a>
   <a href="https://packagist.org/packages/laravel/framework">
     <img src="https://img.shields.io/packagist/l/laravel/framework" alt="License">
   </a>
 </p>
 
-## Tentang Proyek Ini
+---
 
-Proyek ini dibangun dengan menggunakan framework **Laravel** yang kuat dan elegan, dirancang untuk membuat pengembangan web menjadi pengalaman yang benar-benar menyenangkan dan kreatif. Proyek ini memanfaatkan versi terbaru dari berbagai teknologi untuk memastikan lingkungan pengembangan yang kuat dan efisien.
+## 📌 Tentang Proyek
 
-### Teknologi yang Digunakan
+Proyek ini dibangun menggunakan **Laravel 11** dan **Filament v3**, bertujuan untuk mengelola sistem **Helpdesk Ticketing** khususnya layanan **FTTH (Fiber to the Home)**.
 
-- **PHP 8.2^**
-- **Laravel 11**
-- **Filament v3**
-- **MariaDB**
+Sistem ini dilengkapi dengan fitur:
+- Perhitungan **SLA (Service Level Agreement)** secara akurat
+- Laporan statistik SLA bulanan
+- Dashboard admin dan ekspor laporan ke Excel
 
-## Fitur Utama
+---
 
-- **Mesin Routing yang Sederhana dan Cepat:** [Pelajari lebih lanjut](https://laravel.com/docs/routing)
-- **Kontainer Dependency Injection yang Kuat:** [Pelajari lebih lanjut](https://laravel.com/docs/container)
-- **Beberapa Backend untuk Penyimpanan Sesi dan Cache:** [Sesi](https://laravel.com/docs/session) | [Cache](https://laravel.com/docs/cache)
-- **ORM Database yang Ekspresif dan Intuitif (Eloquent):** [Pelajari lebih lanjut](https://laravel.com/docs/eloquent)
-- **Migrasi Skema yang Agnostik terhadap Database:** [Pelajari lebih lanjut](https://laravel.com/docs/migrations)
-- **Pemrosesan Pekerjaan Latar Belakang yang Kuat:** [Pelajari lebih lanjut](https://laravel.com/docs/queues)
-- **Penyiaran Acara Waktu Nyata:** [Pelajari lebih lanjut](https://laravel.com/docs/broadcasting)
+## ⚙️ Teknologi yang Digunakan
 
-## Tentang Filament
+- PHP 8.2+
+- Laravel 11
+- Filament v3
+- MariaDB
 
-**Filament** adalah panel admin stack TALL (Tailwind CSS, Alpine.js, Laravel, dan Livewire) yang elegan untuk Laravel yang memudahkan pembuatan antarmuka administratif. Ini menyediakan panel admin out-of-the-box yang indah dan mudah disesuaikan.
+---
 
-- **Panel Admin untuk Laravel**
-- **Dibangun dengan Tailwind CSS, Alpine.js, Laravel, dan Livewire**
-- **Mudah Disesuaikan dan Diperluas**
+## 🎯 Fitur Utama
 
-Pelajari lebih lanjut tentang Filament [di sini](https://filamentphp.com/docs/).
+- Antarmuka admin modern berbasis Filament
+- Otomatisasi perhitungan uptime dan SLA tiket
+- Statistik SLA bulanan dan laporan terintegrasi
+- Ekspor laporan ke Excel dengan format informatif
+- Scope query khusus untuk analisis SLA
+- Dashboard siap dikembangkan untuk real-time monitoring
 
-## Database
+---
 
-Proyek ini menggunakan **MariaDB** sebagai server database, memastikan manajemen database yang andal dan berkinerja tinggi.
+## 📈 Implementasi SLA
 
-## Sumber Pembelajaran
+### 🎯 Target SLA: 99,5%
 
-Laravel menawarkan dokumentasi yang luas dan perpustakaan video tutorial yang komprehensif untuk memudahkan memulai. Berikut beberapa sumber daya untuk membantu Anda belajar dan menguasai Laravel:
+#### ✅ Konstanta
+```php
+const TARGET_UPTIME_PERCENTAGE = 99.5;
+```
 
-- **[Dokumentasi Laravel](https://laravel.com/docs)**
-- **[Laravel Bootcamp](https://bootcamp.laravel.com)**: Panduan membangun aplikasi Laravel modern dari awal.
-- **[Laracasts](https://laracasts.com)**: Ribuan video tutorial tentang Laravel, PHP modern, pengujian unit, dan JavaScript.
+#### 🧮 Fungsi Perhitungan SLA
+- `calculateTotalTimeInMonth()` → total menit dalam bulan berjalan
+- `calculateAllowedDowntimeInMonth()` → downtime maksimum yang diizinkan
+- `calculateResolutionTime()` → waktu resolusi dikurangi waktu pending
+- `calculateUptimePercentage()` → persentase uptime aktual
 
-## Sponsor Laravel
+#### 📊 Atribut Baru di Model `Ticket`
+- `uptime_percentage`
+- `sla_status` (Memenuhi / Melebihi SLA)
+- `resolution_time` (format mudah dibaca)
+- `allowed_downtime`
+- `duration_in_days`
 
-Kami mengucapkan terima kasih kepada sponsor berikut yang telah mendanai pengembangan Laravel. Tertarik menjadi sponsor? Kunjungi [program Laravel Partners](https://partners.laravel.com).
+#### 🔍 Scope Query Baru
+- `scopeMeetingSla()` → tiket sesuai SLA
+- `scopeExceedingSla()` → tiket melebihi SLA
+- `scopeInMonth()` → filter berdasarkan bulan
+- `scopeFtth()` → filter berdasarkan layanan FTTH
 
-### Mitra Premium
+#### 📤 Ekspor Excel
+- Ringkasan statistik SLA
+- Kolom tambahan:
+  - Durasi (dd hh)
+  - Uptime Percentage
+  - Allowed Downtime
+  - SLA Status
+- Styling agar laporan lebih informatif
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+---
 
-## Berkontribusi
+## 📚 Referensi Pembelajaran
 
-Terima kasih telah mempertimbangkan untuk berkontribusi ke framework Laravel! Panduan kontribusi dapat ditemukan di [dokumentasi Laravel](https://laravel.com/docs/contributions).
+- 📖 [Laravel Documentation](https://laravel.com/docs)
+- 🚀 [Laravel Bootcamp](https://bootcamp.laravel.com)
+- 🎥 [Laracasts](https://laracasts.com)
 
-## Kode Etik
+---
 
-Untuk memastikan komunitas Laravel menyambut semua orang, harap tinjau dan patuhi [Kode Etik](https://laravel.com/docs/contributions#code-of-conduct).
+## 🤝 Berkontribusi
 
-## Kerentanan Keamanan
+Terima kasih atas minat Anda! Lihat panduan kontribusi di [dokumentasi Laravel](https://laravel.com/docs/contributions).
 
-Jika Anda menemukan kerentanan keamanan dalam Laravel, harap kirim e-mail ke Taylor Otwell melalui [taylor@laravel.com](mailto:taylor@laravel.com). Semua kerentanan keamanan akan segera ditangani.
+### 🧭 Kode Etik
+Mohon untuk mematuhi [Kode Etik Laravel](https://laravel.com/docs/contributions#code-of-conduct) demi menjaga komunitas yang inklusif dan profesional.
 
-## Lisensi
+---
 
-Framework Laravel adalah perangkat lunak sumber terbuka yang dilisensikan di bawah [lisensi MIT](https://opensource.org/licenses/MIT).
+## 🔐 Keamanan
 
-Catatan Perubahan Implementasi SLA untuk Helpdesk Ticket FTTH
-Perubahan yang Telah Dilakukan
+Jika menemukan celah keamanan, harap hubungi langsung:
+📧 [taylor@laravel.com](mailto:taylor@laravel.com)
 
-Penambahan Perhitungan SLA dengan Target Uptime 99,5%
+Semua laporan akan ditangani secara rahasia dan prioritas tinggi.
 
-Implementasi konstanta TARGET_UPTIME_PERCENTAGE = 99.5 pada model Ticket
-Perhitungan menyesuaikan dengan jumlah hari dalam bulan (termasuk Februari vs bulan lain)
+---
 
+## ⚖️ Lisensi
 
-Penambahan Method Perhitungan Waktu
+Proyek ini dilisensikan di bawah [MIT License](https://opensource.org/licenses/MIT).
 
-calculateTotalTimeInMonth(): Menghitung total menit dalam satu bulan
-calculateAllowedDowntimeInMonth(): Menghitung downtime maksimum yang diizinkan (0,5% dari total waktu)
-calculateResolutionTime(): Menghitung waktu resolusi tiket dengan memperhitungkan waktu pending
-calculateUptimePercentage(): Menghitung persentase uptime berdasarkan waktu resolusi
+---
 
+## 🚧 Rencana Pengembangan
 
-Penambahan Atribut Model
+- Dashboard real-time untuk SLA monitoring
+- Notifikasi otomatis ketika tiket hampir melewati batas SLA
+- Integrasi sistem pelaporan untuk analisis tren dan performa layanan
 
-uptime_percentage: Persentase uptime tiket
-sla_status: Status SLA tiket (Memenuhi/Melebihi SLA)
-resolution_time: Waktu resolusi dalam format yang mudah dibaca
-allowed_downtime: Downtime maksimum yang diizinkan
-duration_in_days: Durasi tiket dalam format hari-jam-menit (dd hh)
-
-
-Penambahan Scope Query
-
-scopeMeetingSla(): Mendapatkan tiket yang memenuhi SLA
-scopeExceedingSla(): Mendapatkan tiket yang melebihi SLA
-scopeInMonth(): Mendapatkan tiket dalam bulan tertentu
-scopeFtth(): Mendapatkan tiket untuk layanan FTTH
-
-
-Penambahan Method Statistik
-
-getSlaStats(): Menghitung statistik SLA untuk periode tertentu
-
-
-Modifikasi Ekspor Excel
-
-Penambahan ringkasan statistik SLA
-Penambahan statistik bulanan
-Penambahan kolom Durasi (dd hh)
-Penambahan kolom Uptime Percentage
-Penambahan kolom Allowed Downtime
-Penambahan kolom SLA Status
-Styling untuk kolom-kolom baru
-
-
-
-Rincian File yang Diubah
-1. Model Ticket.php
-
-Penambahan konstanta dan properti untuk SLA
-Implementasi metode perhitungan SLA
-Implementasi getter untuk atribut baru
-Penambahan scope query untuk memudahkan filtering
-
-2. Kelas TicketsExport.php
-
-Modifikasi untuk menambahkan data SLA dalam ekspor
-Penambahan statistik SLA dalam header laporan
-Penambahan kolom untuk informasi SLA
-Penyesuaian styling untuk laporan yang lebih informatif
-
-Manfaat Implementasi
-
-Perhitungan SLA yang Akurat
-
-Memperhitungkan waktu pending dalam perhitungan SLA
-Menyesuaikan dengan jumlah hari dalam bulan
-Target uptime 99,5% sesuai standar perusahaan
-
-
-Analisis Performa Layanan
-
-Statistik bulanan membantu menganalisis tren performa
-Persentase kepatuhan SLA memberikan gambaran kualitas layanan
-
-
-Laporan yang Komprehensif
-
-Tampilan durasi dalam format hari-jam-menit memudahkan pembacaan
-Pewarnaan status membantu identifikasi cepat tiket bermasalah
-
-
-Fleksibilitas Query
-
-Scope query memudahkan filtering data untuk keperluan analisis lanjutan
-
-
-
-Catatan Penting
-
-Target SLA uptime diatur pada 99,5%. Jika ada perubahan kebijakan, cukup ubah nilai konstanta TARGET_UPTIME_PERCENTAGE pada model Ticket.
-Perhitungan memperhitungkan perbedaan jumlah hari dalam bulan, sehingga downtime maksimum yang diizinkan akan berbeda untuk Februari dibandingkan dengan bulan-bulan lainnya.
-Waktu pending tidak dihitung dalam durasi dan waktu resolusi tiket, sehingga hanya menghitung waktu aktif penanganan tiket.
-
-Pengembangan Lanjutan yang Dapat Dilakukan
-
-Dashboard analitik untuk pemantauan SLA real-time
-Notifikasi otomatis saat tiket mendekati atau melebihi batas SLA
-Integrasi dengan sistem pelaporan untuk memberikan insight tentang area layanan yang perlu peningkatan
+---
