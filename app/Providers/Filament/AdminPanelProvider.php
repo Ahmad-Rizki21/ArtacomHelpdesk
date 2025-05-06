@@ -33,6 +33,8 @@ use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Awcodes\FilamentStickyHeader\StickyHeaderPlugin;
 use Kenepa\Banner\BannerPlugin;
 use Andreia\FilamentNordTheme\FilamentNordThemePlugin;
+use App\Filament\Pages\Settings;
+use Filament\Navigation\MenuItem;
 
 use Filament\Navigation\NavigationGroup;
 use Filament\Navigation\NavigationItem;
@@ -56,6 +58,11 @@ class AdminPanelProvider extends PanelProvider
                 'success' => Color::Emerald,
                 'gray' => Color::Slate,
                 ])
+                ->sidebarFullyCollapsibleOnDesktop()
+                ->sidebarWidth('17rem')
+
+            
+                
             
             ->brandName('ARTACOM HELPDESK')
             ->favicon(asset('images/Favicon.png'))
@@ -65,6 +72,11 @@ class AdminPanelProvider extends PanelProvider
 
             ->brandLogoHeight(fn () => \Illuminate\Support\Facades\Auth::check() ? '3.5rem' : '9rem')
             
+
+
+                
+
+
             ->darkMode(true)
             ->navigationGroups([
                 NavigationGroup::make()->label('Helpdesk'),

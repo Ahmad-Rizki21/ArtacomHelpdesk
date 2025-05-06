@@ -27,6 +27,7 @@ use Filament\Forms\Set;
 use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Collection;
 use Filament\Forms\Components\DatePicker;
+use Filament\Tables\Grouping\Group;
 
 class TicketResource extends Resource
 {
@@ -250,6 +251,16 @@ class TicketResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            // ->defaultGroup('status')
+            ->groups([
+                Group::make('status')
+                    ->getDescriptionFromRecordUsing(fn (Ticket $record): string => match ($record->status) {
+                        'OPEN' => 'Ticket is open',
+                        'PENDING' => 'Ticket is pending',
+                        'CLOSED' => 'Ticket is closed',
+                        default => 'Unknown status',
+                    }),
+            ])
             ->columns([
                 
                 TextColumn::make('ticket_number')
@@ -401,12 +412,12 @@ class TicketResource extends Resource
                 ->searchable(),
                     
 
-                CircleProgress::make('Progress')  
-                    ->getStateUsing(fn ($record) => [  
-                        'total' => 100,  
-                        'progress' => $record->progress_percentage,  
-                    ])
-                    ->label('Progress'),  
+                // CircleProgress::make('Progress')  
+                //     ->getStateUsing(fn ($record) => [  
+                //         'total' => 100,  
+                //         'progress' => $record->progress_percentage,  
+                //     ])
+                //     ->label('Progress'),  
                 
                 ProgressBar::make('Progress Bar')  
                     ->getStateUsing(fn ($record) => [  

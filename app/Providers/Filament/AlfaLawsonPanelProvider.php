@@ -48,6 +48,10 @@ class AlfaLawsonPanelProvider extends PanelProvider
                 'gray' => Color::Slate,
             ])
 
+            ->sidebarFullyCollapsibleOnDesktop()
+            ->sidebarWidth('17rem')
+            
+
             ->brandName('ARTACOM HELPDESK')
             ->favicon(asset('images/Favicon.png'))
             

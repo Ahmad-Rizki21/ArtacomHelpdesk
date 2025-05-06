@@ -60,7 +60,7 @@ class Ticket extends Model
         'uptime_percentage',
         'allowed_downtime'
     ];
-
+    
     /**
      * Update timer berdasarkan perubahan status
      * Dipanggil saat status tiket berubah
