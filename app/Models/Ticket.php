@@ -18,6 +18,8 @@ class Ticket extends Model
      */
     const TARGET_UPTIME_PERCENTAGE = 99.5;
 
+    const TICKET_PREFIX = 'TFTTH-';
+
     protected $fillable = [
         'no',
         'service',
@@ -159,9 +161,24 @@ class Ticket extends Model
             }
         });
         
+        //Nomer ticket acack
+    //     static::creating(function ($model) {
+    //         if (!$model->ticket_number) {
+    //             $model->ticket_number = 'TFTTH-' . strtoupper(uniqid());
+    //         }
+            
+    //         if (!$model->created_by) {
+    //             $model->created_by = Auth::id();
+    //         }
+            
+    //         // Set last_status_change_at saat tiket dibuat
+    //         $model->last_status_change_at = now();
+    //     });
+    // }
         static::creating(function ($model) {
+            // Generate sequential ticket number
             if (!$model->ticket_number) {
-                $model->ticket_number = 'TFTTH-' . strtoupper(uniqid());
+                $model->ticket_number = self::generateSequentialTicketNumber();
             }
             
             if (!$model->created_by) {
@@ -171,6 +188,33 @@ class Ticket extends Model
             // Set last_status_change_at saat tiket dibuat
             $model->last_status_change_at = now();
         });
+    }
+
+
+    public static function generateSequentialTicketNumber(): string
+    {
+        // Dapatkan tiket terakhir
+        $lastTicket = self::orderBy('id', 'desc')->first();
+        
+        // Jika tidak ada tiket sebelumnya, mulai dari 1
+        if (!$lastTicket) {
+            return self::TICKET_PREFIX . '0001';
+        }
+        
+        // Cek apakah tiket terakhir sudah menggunakan format baru
+        $lastNumber = null;
+        
+        if (preg_match('/' . self::TICKET_PREFIX . '(\d+)$/', $lastTicket->ticket_number, $matches)) {
+            // Jika sudah format baru, ambil nomor dan tambahkan 1
+            $lastNumber = (int) $matches[1];
+            $newNumber = $lastNumber + 1;
+        } else {
+            // Jika belum format baru, mulai dari 1
+            $newNumber = 1;
+        }
+        
+        // Format nomor dengan padding 4 digit
+        return self::TICKET_PREFIX . str_pad($newNumber, 4, '0', STR_PAD_LEFT);
     }
 
     /**
