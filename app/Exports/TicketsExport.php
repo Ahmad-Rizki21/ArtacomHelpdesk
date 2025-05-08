@@ -58,12 +58,14 @@ class TicketsExport implements WithMultipleSheets
 
     private function calculateStatistics()
     {
+        // Hitung status tiket
         $this->ticketStatusCount = [
             'OPEN' => $this->tickets->where('status', 'OPEN')->count(),
             'PENDING' => $this->tickets->where('status', 'PENDING')->count(),
             'CLOSED' => $this->tickets->where('status', 'CLOSED')->count()
         ];
 
+        // Filter tiket yang sudah ditutup dan memiliki tanggal laporan
         $closedTickets = $this->tickets->filter(function ($ticket) {
             return $ticket->closed_date && $ticket->report_date;
         });
@@ -72,6 +74,7 @@ class TicketsExport implements WithMultipleSheets
             return;
         }
 
+        // Inisialisasi statistik bulanan
         $this->initializeMonthlyStats($closedTickets);
 
         $totalUptime = 0;
@@ -84,6 +87,7 @@ class TicketsExport implements WithMultipleSheets
                 $totalUptime += $uptimePercentage;
                 $validTicketsCount++;
 
+                // Cek apakah tiket memenuhi SLA
                 $isMeetingSla = $ticket->isMeetingSlaTarget();
                 if ($isMeetingSla === true) {
                     $this->slaMetCount++;
@@ -101,8 +105,10 @@ class TicketsExport implements WithMultipleSheets
             }
         }
 
+        // Hitung rata-rata uptime
         $this->averageUptime = $validTicketsCount > 0 ? $totalUptime / $validTicketsCount : 0;
 
+        // Hitung persentase kepatuhan SLA untuk setiap bulan
         foreach ($this->monthlyStats as $month => &$stats) {
             $total = $stats['met'] + $stats['missed'];
             $stats['compliance'] = $total > 0 ? ($stats['met'] / $total) * 100 : 0;
@@ -111,33 +117,42 @@ class TicketsExport implements WithMultipleSheets
             $stats['allowed_downtime'] = Ticket::calculateAllowedDowntimeInMonth($date);
         }
 
+        // Urutkan berdasarkan bulan
         ksort($this->monthlyStats);
     }
 
     private function analyzeProblems()
     {
+        // Analisis jenis masalah
         foreach ($this->tickets as $ticket) {
             if (!empty($ticket->problem_summary)) {
                 $problemType = $ticket->problem_summary;
                 $this->problemTypes[$problemType] = ($this->problemTypes[$problemType] ?? 0) + 1;
             }
 
+            // Analisis jenis layanan
             if (!empty($ticket->service)) {
                 $this->serviceTypes[$ticket->service] = ($this->serviceTypes[$ticket->service] ?? 0) + 1;
             }
         }
 
+        // Urutkan berdasarkan jumlah (terbanyak terlebih dahulu)
         arsort($this->problemTypes);
+        // Ambil 10 jenis masalah teratas saja
         $this->problemTypes = array_slice($this->problemTypes, 0, 10, true);
+        
+        // Urutkan jenis layanan
         arsort($this->serviceTypes);
     }
 
     private function initializeMonthlyStats($tickets)
     {
+        // Kelompokkan tiket berdasarkan bulan
         $months = $tickets->map(function ($ticket) {
             return $ticket->report_date->format('Y-m');
         })->unique();
 
+        // Inisialisasi statistik untuk setiap bulan
         foreach ($months as $month) {
             $this->monthlyStats[$month] = [
                 'met' => 0,
@@ -176,7 +191,7 @@ class DashboardSheet implements WithTitle, WithStyles, WithEvents
 
     public function styles(Worksheet $sheet)
     {
-        // Title
+        // Judul
         $sheet->mergeCells('A1:G1');
         $sheet->setCellValue('A1', 'DASHBOARD TICKET HELPDESK FTTH');
         $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(16)->setColor(new Color('FFFFFF'));
@@ -226,40 +241,6 @@ class DashboardSheet implements WithTitle, WithStyles, WithEvents
                 $sheet = $event->sheet->getDelegate();
 
                 // Status Distribution Pie Chart
-                $statusLabels = new DataSeriesValues(
-                    DataSeriesValues::DATASERIES_TYPE_STRING,
-                    'Dashboard!$A$6:$A$8',
-                    null,
-                    3
-                );
-                $statusValues = new DataSeriesValues(
-                    DataSeriesValues::DATASERIES_TYPE_NUMBER,
-                    'Dashboard!$B$6:$B$8',
-                    null,
-                    3
-                );
-
-                $statusSeries = new DataSeries(
-                    DataSeries::TYPE_PIECHART,
-                    DataSeries::GROUPING_STANDARD,
-                    range(0, 0),
-                    [$statusLabels],
-                    [],
-                    [$statusValues]
-                );
-
-                $statusPlotArea = new PlotArea(null, [$statusSeries]);
-                $statusLegend = new Legend(Legend::POSITION_RIGHT, null, false);
-                $statusTitle = new Title('Status Distribution');
-
-                $statusChart = new Chart(
-                    'StatusChart',
-                    $statusTitle,
-                    $statusLegend,
-                    $statusPlotArea
-                );
-
-                // Status Data
                 $sheet->setCellValue('A5', 'Status Distribution');
                 $sheet->getStyle('A5')->getFont()->setBold(true);
                 $sheet->setCellValue('A6', 'OPEN');
@@ -269,9 +250,53 @@ class DashboardSheet implements WithTitle, WithStyles, WithEvents
                 $sheet->setCellValue('B7', $this->ticketStatusCount['PENDING']);
                 $sheet->setCellValue('B8', $this->ticketStatusCount['CLOSED']);
 
-                $statusChart->setTopLeftPosition('A10');
-                $statusChart->setBottomRightPosition('D20');
-                $sheet->addChart($statusChart);
+                try {
+                    $statusLabels = new DataSeriesValues(
+                        DataSeriesValues::DATASERIES_TYPE_STRING,
+                        'Dashboard!$A$6:$A$8',
+                        null,
+                        3
+                    );
+                    $statusValues = new DataSeriesValues(
+                        DataSeriesValues::DATASERIES_TYPE_NUMBER,
+                        'Dashboard!$B$6:$B$8',
+                        null,
+                        3
+                    );
+                    
+                    $statusValues->setFillColor([
+                        'FF6B6B', // OPEN - Light red
+                        'FFD700', // PENDING - Light yellow
+                        '32CD32'  // CLOSED - Light green
+                    ]);
+
+                    $statusSeries = new DataSeries(
+                        DataSeries::TYPE_PIECHART,
+                        DataSeries::GROUPING_STANDARD,
+                        range(0, 0),
+                        [$statusLabels],
+                        [null], // Empty array causes issues, use [null] instead
+                        [$statusValues]
+                    );
+
+                    $statusPlotArea = new PlotArea(null, [$statusSeries]);
+                    $statusLegend = new Legend(Legend::POSITION_RIGHT, null, false);
+                    $statusTitle = new Title('Status Distribution');
+
+                    $statusChart = new Chart(
+                        'StatusChart',
+                        $statusTitle,
+                        $statusLegend,
+                        $statusPlotArea
+                    );
+
+                    $statusChart->setTopLeftPosition('A10');
+                    $statusChart->setBottomRightPosition('D20');
+                    $sheet->addChart($statusChart);
+                } catch (\Exception $e) {
+                    // Log error if chart creation fails, but continue processing
+                    error_log('Error creating status chart: ' . $e->getMessage());
+                }
 
                 // SLA Trend Bar Chart
                 if (!empty($this->monthlyStats)) {
@@ -295,51 +320,58 @@ class DashboardSheet implements WithTitle, WithStyles, WithEvents
 
                     $lastRow = $row - 1;
 
-                    // Create Bar Chart
-                    $labels = new DataSeriesValues(
-                        DataSeriesValues::DATASERIES_TYPE_STRING,
-                        "Dashboard!A" . ($startRow + 1) . ":A" . $lastRow,
-                        null,
-                        count($this->monthlyStats)
-                    );
+                    try {
+                        // Create Bar Chart
+                        $labels = new DataSeriesValues(
+                            DataSeriesValues::DATASERIES_TYPE_STRING,
+                            "Dashboard!A" . ($startRow + 1) . ":A" . $lastRow,
+                            null,
+                            count($this->monthlyStats)
+                        );
 
-                    $metValues = new DataSeriesValues(
-                        DataSeriesValues::DATASERIES_TYPE_NUMBER,
-                        "Dashboard!B" . ($startRow + 1) . ":B" . $lastRow,
-                        null,
-                        count($this->monthlyStats)
-                    );
+                        $metValues = new DataSeriesValues(
+                            DataSeriesValues::DATASERIES_TYPE_NUMBER,
+                            "Dashboard!B" . ($startRow + 1) . ":B" . $lastRow,
+                            null,
+                            count($this->monthlyStats)
+                        );
+                        $metValues->setFillColor(['32CD32']); // Light green
 
-                    $missedValues = new DataSeriesValues(
-                        DataSeriesValues::DATASERIES_TYPE_NUMBER,
-                        "Dashboard!C" . ($startRow + 1) . ":C" . $lastRow,
-                        null,
-                        count($this->monthlyStats)
-                    );
+                        $missedValues = new DataSeriesValues(
+                            DataSeriesValues::DATASERIES_TYPE_NUMBER,
+                            "Dashboard!C" . ($startRow + 1) . ":C" . $lastRow,
+                            null,
+                            count($this->monthlyStats)
+                        );
+                        $missedValues->setFillColor(['FF6B6B']); // Light red
 
-                    $series = new DataSeries(
-                        DataSeries::TYPE_BARCHART,
-                        DataSeries::GROUPING_STACKED,
-                        range(0, 1),
-                        [$labels],
-                        ['Met SLA', 'Missed SLA'],
-                        [$metValues, $missedValues]
-                    );
+                        $series = new DataSeries(
+                            DataSeries::TYPE_BARCHART,
+                            DataSeries::GROUPING_STACKED,
+                            range(0, 1),
+                            [$labels],
+                            [null, null], // Empty array causes issues, use [null, null] instead
+                            [$metValues, $missedValues]
+                        );
 
-                    $plotArea = new PlotArea(null, [$series]);
-                    $legend = new Legend(Legend::POSITION_RIGHT, null, false);
-                    $title = new Title('Monthly SLA Performance');
+                        $plotArea = new PlotArea(null, [$series]);
+                        $legend = new Legend(Legend::POSITION_RIGHT, null, false);
+                        $title = new Title('Monthly SLA Performance');
 
-                    $chart = new Chart(
-                        'SlaTrendChart',
-                        $title,
-                        $legend,
-                        $plotArea
-                    );
+                        $chart = new Chart(
+                            'SlaTrendChart',
+                            $title,
+                            $legend,
+                            $plotArea
+                        );
 
-                    $chart->setTopLeftPosition('A' . ($lastRow + 2));
-                    $chart->setBottomRightPosition('F' . ($lastRow + 15));
-                    $sheet->addChart($chart);
+                        $chart->setTopLeftPosition('A' . ($lastRow + 2));
+                        $chart->setBottomRightPosition('F' . ($lastRow + 15));
+                        $sheet->addChart($chart);
+                    } catch (\Exception $e) {
+                        // Log error if chart creation fails, but continue processing
+                        error_log('Error creating SLA trend chart: ' . $e->getMessage());
+                    }
                 }
             },
         ];
@@ -422,6 +454,7 @@ class TicketDataSheet implements FromCollection, WithHeadings, WithMapping, Shou
             $headers[] = [''];
         }
 
+        // Header kolom untuk data tiket
         $headers[] = [
             'No Ticket',
             'Layanan',
@@ -444,9 +477,14 @@ class TicketDataSheet implements FromCollection, WithHeadings, WithMapping, Shou
 
     public function map($ticket): array
     {
+        // Formatkan data tiket untuk tabel
         $uptime = $ticket->calculateUptimePercentage();
         $formattedUptime = $uptime !== null ? number_format($uptime, 2) . '%' : 'N/A';
-
+        
+        // Pastikan nilai tidak NULL untuk semua field
+        $closedDate = $ticket->closed_date ? $ticket->closed_date->format('d/m/Y H:i:s') : 'Belum Selesai';
+        $resolutionTime = $ticket->resolution_time ?: '00:00';
+        
         return [
             $ticket->ticket_number,
             $ticket->service,
@@ -455,12 +493,12 @@ class TicketDataSheet implements FromCollection, WithHeadings, WithMapping, Shou
             $ticket->report_date ? $ticket->report_date->format('d/m/Y H:i:s') : '-',
             $ticket->status,
             $ticket->pending_clock ?? '0',
-            $ticket->closed_date ? $ticket->closed_date->format('d/m/Y H:i:s') : '-',
-            $ticket->resolution_time,
+            $closedDate,
+            $resolutionTime,
             $formattedUptime,
             $ticket->allowed_downtime,
-            $ticket->sla_status,
-            $ticket->action_description,
+            $ticket->sla_status ?: '-',
+            $ticket->action_description ?: '-',
             $ticket->creator->name ?? '(Tidak Ada)',
         ];
     }
@@ -468,10 +506,11 @@ class TicketDataSheet implements FromCollection, WithHeadings, WithMapping, Shou
     public function columnFormats(): array
     {
         return [
+            // Format tanggal untuk kolom Report Date dan Closed Date
             'E' => NumberFormat::FORMAT_DATE_DATETIME,
             'H' => NumberFormat::FORMAT_DATE_DATETIME,
+            // Format numerik untuk kolom Pending (menit)
             'G' => NumberFormat::FORMAT_NUMBER,
-            'J' => NumberFormat::FORMAT_PERCENTAGE_00,
         ];
     }
 
@@ -501,10 +540,10 @@ class TicketDataSheet implements FromCollection, WithHeadings, WithMapping, Shou
         $sheet->mergeCells('A4:D4');
 
         $statusStyles = [
-            'A5:B5' => 'FF6B6B',
-            'A6:B6' => 'FFD700',
-            'A7:B7' => '32CD32',
-            'A8:B8' => '4682B4'
+            'A5:B5' => 'FF6B6B', // OPEN - Light red
+            'A6:B6' => 'FFD700', // PENDING - Light yellow
+            'A7:B7' => '32CD32', // CLOSED - Light green
+            'A8:B8' => '4682B4'  // TOTAL - Light blue
         ];
 
         foreach ($statusStyles as $range => $color) {
@@ -519,10 +558,10 @@ class TicketDataSheet implements FromCollection, WithHeadings, WithMapping, Shou
         $sheet->mergeCells('A10:D10');
 
         $slaStyles = [
-            'A11:B11' => '1E90FF',
-            'A12:B12' => '32CD32',
-            'A13:B13' => 'FF6B6B',
-            'A14:B14' => '4682B4'
+            'A11:B11' => '1E90FF', // Uptime - Blue
+            'A12:B12' => '32CD32', // Met SLA - Green
+            'A13:B13' => 'FF6B6B', // Missed SLA - Red
+            'A14:B14' => '4682B4'  // Percentage - Blue
         ];
 
         foreach ($slaStyles as $range => $color) {
@@ -547,7 +586,7 @@ class TicketDataSheet implements FromCollection, WithHeadings, WithMapping, Shou
             $sheet->getStyle("B" . ($statsStartRow + 2) . ":E{$statsEndRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
         }
 
-        // Data Table
+        // Data Table Styling
         $sheet->getStyle("A{$dataHeaderRow}:N{$dataHeaderRow}")->getFont()->setBold(true);
         $sheet->getStyle("A{$dataHeaderRow}:N{$dataHeaderRow}")->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB('4682B4');
         $sheet->getStyle("A{$dataHeaderRow}:N{$dataHeaderRow}")->getFont()->setColor(new Color('FFFFFF'));
@@ -574,7 +613,7 @@ class TicketDataSheet implements FromCollection, WithHeadings, WithMapping, Shou
             $statusConditionals[] = $conditional;
         }
 
-        $sheet->getStyle("F{$dataHeaderRow}:F{$lastDataRow}")->setConditionalStyles($statusConditionals);
+        $sheet->getStyle("F" . ($dataHeaderRow + 1) . ":F{$lastDataRow}")->setConditionalStyles($statusConditionals);
 
         // Conditional Formatting for SLA
         $slaConditionals = [

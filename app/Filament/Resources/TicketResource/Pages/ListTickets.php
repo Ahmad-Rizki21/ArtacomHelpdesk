@@ -52,11 +52,11 @@ class ListTickets extends ListRecords
                 ->icon('heroicon-o-check-circle')
                 ->modifyQueryUsing(fn (Builder $query) => $query->where('status', 'CLOSED')),
 
-            'SLA' => Tab::make('Laporan SLA')
-            ->badge(fn () => Ticket::where('service', 'FTTH')->count())
-            ->badgeColor('info')
-            ->icon('heroicon-o-chart-bar')
-            ->modifyQueryUsing(fn (Builder $query) => $query->where('service', 'FTTH')),
+            // 'SLA' => Tab::make('Laporan SLA')
+            // ->badge(fn () => Ticket::where('service', 'FTTH')->count())
+            // ->badgeColor('info')
+            // ->icon('heroicon-o-chart-bar')
+            // ->modifyQueryUsing(fn (Builder $query) => $query->where('service', 'FTTH')),
                 
             'All' => Tab::make('Semua Tiket')
                 ->badge(fn () => Ticket::count())

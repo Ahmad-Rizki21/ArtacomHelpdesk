@@ -127,7 +127,7 @@ class AdminPanelProvider extends PanelProvider
             
             // Plugin registration
             ->plugins([
-                FilamentNordThemePlugin::make(),
+                // FilamentNordThemePlugin::make(),
                 FilamentApexChartsPlugin::make(),
                 EasyFooterPlugin::make()
                     ->withBorder()
