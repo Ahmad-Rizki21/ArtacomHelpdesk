@@ -13,9 +13,11 @@ use Illuminate\Support\HtmlString;
 use Filament\Notifications\Notification;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use App\Models\TicketAction;
 use App\Filament\Components\TicketTimer;
 use Filament\Infolists\Components\Stack;
+use Illuminate\Support\Facades\Storage;
 
 class ViewTicket extends ViewRecord
 {
@@ -143,17 +145,82 @@ class ViewTicket extends ViewRecord
                                 return new HtmlString('<div class="p-3 rounded border border-gray-600 bg-gray-800 text-white">' . e($state) . '</div>');
                             }),
                             
-                        TextEntry::make('evidance_path')
-                            ->label('Evidence')
-                            ->visible(fn ($record) => !empty($record->evidance_path))
-                            ->columnSpanFull()
-                            ->extraAttributes(['class' => 'text-center'])
-                            ->formatStateUsing(function ($state) {
-                                if (empty($state)) {
-                                    return 'Tidak ada bukti';
-                                }
-                                return new HtmlString('<img src="'.asset('storage/'.$state).'" class="max-w-xs mx-auto" alt="Evidence" />');
-                            }),
+                      
+                        TextEntry::make('evidance_paths')
+                        ->label('Evidence')
+                        ->visible(fn ($record) => !empty($record->evidance_paths))
+                        ->columnSpanFull()
+                        ->extraAttributes(['class' => 'text-center'])
+                    ->formatStateUsing(function ($state) {
+                        Log::info('Evidance Paths State in View: ' . json_encode($state));
+
+                        // Jika state adalah string, parse menjadi array
+                        if (is_string($state)) {
+                            $state = array_map('trim', explode(',', $state));
+                        }
+
+                        if (empty($state) || !is_array($state)) {
+                            Log::warning('Evidance Paths is empty or not an array in View');
+                            return '<p class="text-center text-gray-500">Tidak ada bukti yang diunggah</p>';
+                        }
+
+                        $html = '<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">'; // Grid Layout
+                        $imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp'];
+                        $videoExtensions = ['mp4', 'mov', 'avi', 'wmv', 'mkv'];
+                        $documentExtensions = [
+                            'pdf' => ['icon' => 'heroicon-o-document-text', 'label' => 'PDF'],
+                            'doc' => ['icon' => 'heroicon-o-document', 'label' => 'Word Document'],
+                            'docx' => ['icon' => 'heroicon-o-document', 'label' => 'Word Document'],
+                            'xls' => ['icon' => 'heroicon-o-table-cells', 'label' => 'Excel Spreadsheet'],
+                            'xlsx' => ['icon' => 'heroicon-o-table-cells', 'label' => 'Excel Spreadsheet'],
+                            'txt' => ['icon' => 'heroicon-o-document-text', 'label' => 'Text File'],
+                        ];
+
+                        foreach ($state as $file) {
+                            if (empty($file)) {
+                                Log::warning('Empty file path detected in evidance_paths');
+                                continue;
+                            }
+
+                            $fileUrl = Storage::url($file);
+                            $extension = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+
+                            Log::info('Generated File URL: ' . $fileUrl);
+
+                            if (in_array($extension, $imageExtensions)) {
+                                $html .= '<div class="text-center p-4 border rounded-lg shadow-md">
+                                    <img src="' . $fileUrl . '" class="max-w-sm max-h-64 mx-auto rounded-lg" alt="Evidence" />
+                                    <p class="text-sm text-gray-500 mt-2">Image File</p>
+                                </div>';
+                            } elseif (in_array($extension, $videoExtensions)) {
+                                $html .= '<div class="text-center p-4 border rounded-lg shadow-md">
+                                    <video controls class="max-w-sm max-h-64 mx-auto rounded-lg">
+                                        <source src="' . $fileUrl . '" type="video/' . $extension . '">
+                                        Your browser does not support the video tag.
+                                    </video>
+                                    <p class="text-sm text-gray-500 mt-2">Video File</p>
+                                </div>';
+                            } elseif (array_key_exists($extension, $documentExtensions)) {
+                                $docInfo = $documentExtensions[$extension];
+                                $html .= '<div class="text-center p-4 border rounded-lg shadow-md">
+                                    <a href="' . $fileUrl . '" download class="flex items-center justify-center space-x-2 text-blue-500 hover:text-blue-700">
+                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="' . $docInfo['icon'] . '"></path>
+                                        </svg>
+                                        <span>Download ' . $docInfo['label'] . '</span>
+                                    </a>
+                                </div>';
+                            } else {
+                                $html .= '<div class="text-center p-4 border rounded-lg shadow-md">
+                                    <p class="text-sm text-red-500">Jenis file ' . $extension . ' tidak didukung</p>
+                                </div>';
+                            }
+                        }
+
+                        $html .= '</div>';
+                        return new HtmlString($html);
+                    }),
+
                         Grid::make(2)->schema([
                             TextEntry::make('pending_clock')
                                 ->label('Pending Clock')

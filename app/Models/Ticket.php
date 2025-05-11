@@ -35,7 +35,7 @@ class Ticket extends Model
         'title',
         'description',
         'sla_id',
-        'evidance_path',
+        'evidance_paths',
         'created_by',
         'assigned_to',
         // Kolom baru untuk timer
@@ -49,6 +49,7 @@ class Ticket extends Model
         'closed_date' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
+        'evidance_paths' => 'array',
         'last_status_change_at' => 'datetime',
     ];
 
@@ -148,7 +149,13 @@ class Ticket extends Model
     protected static function boot()
     {
         parent::boot();
-        
+     
+            static::saving(function ($model) {
+        if ($model->isDirty('evidance_paths')) {
+            Log::info('Evidance Paths Before Save in Model: ' . json_encode($model->evidance_paths));
+        }
+    });
+
         // Observer untuk update timer saat status berubah
         static::updating(function ($model) {
             if ($model->isDirty('status')) {
