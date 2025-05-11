@@ -7,6 +7,7 @@ use App\Filament\Widgets\TicketStatsWidget;
 use App\Filament\Widgets\BackboneTicketStatsWidget;
 use App\Filament\Widgets\TicketChartWidget;
 use App\Filament\Widgets\BackboneTicketChartWidget;
+use App\Filament\Widgets\UserScoreChartWidget;
 
 class Dashboard extends BaseDashboard
 {
@@ -15,7 +16,6 @@ class Dashboard extends BaseDashboard
     protected static ?string $title = 'Dashboard';
     
     // Configure to use one column layout for charts
-    // This makes charts display full width
     public function getColumns(): int
     {
         return 1;
@@ -36,6 +36,7 @@ class Dashboard extends BaseDashboard
         return [
             TicketChartWidget::class,
             BackboneTicketChartWidget::class,
+            UserScoreChartWidget::class, // Tambahkan widget baru
         ];
     }
 }

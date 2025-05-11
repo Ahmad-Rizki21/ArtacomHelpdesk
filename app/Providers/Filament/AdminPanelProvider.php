@@ -27,6 +27,7 @@ use App\Filament\Widgets\TicketStatsWidget;
 use App\Filament\Widgets\BackboneTicketStatsWidget;
 use App\Filament\Widgets\TicketChartWidget;
 use App\Filament\Widgets\BackboneTicketChartWidget;
+use App\Filament\Widgets\UserScoreChartWidget;
 use Devonab\FilamentEasyFooter\EasyFooterPlugin;
 use Leandrocfe\FilamentApexCharts\FilamentApexChartsPlugin;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
@@ -91,25 +92,25 @@ class AdminPanelProvider extends PanelProvider
             ])
             
             // Menggunakan navigationItems dengan childItems untuk Panel Switcher
-            ->navigationItems([
-                // Panel Switcher dengan dropdown
-                NavigationItem::make()
-                    ->label('Panel Switcher')
-                    ->icon('heroicon-o-squares-2x2')
-                    ->sort(-1) // Nilai sort yang lebih tinggi dari Dashboard (biasanya Dashboard adalah 0)
-                    ->group('Panel Switcher')
-                    ->childItems([
-                        NavigationItem::make()
-                            ->label('FTTH HELPDESK TICKET')
-                            ->url('/admin')
-                            ->icon('heroicon-o-check-circle')
-                            ->isActiveWhen(fn (): bool => request()->is('admin*')),
-                        NavigationItem::make()
-                            ->label('ALFA LAWSON HELPDESK')
-                            ->url('/alfaLawson')
-                            ->icon('heroicon-o-arrow-right-circle'),
-                    ]),
-            ])
+            // ->navigationItems([
+            //     // Panel Switcher dengan dropdown
+            //     NavigationItem::make()
+            //         ->label('Panel Switcher')
+            //         ->icon('heroicon-o-squares-2x2')
+            //         ->sort(-1) // Nilai sort yang lebih tinggi dari Dashboard (biasanya Dashboard adalah 0)
+            //         ->group('Panel Switcher')
+            //         ->childItems([
+            //             NavigationItem::make()
+            //                 ->label('FTTH HELPDESK TICKET')
+            //                 ->url('/admin')
+            //                 ->icon('heroicon-o-check-circle')
+            //                 ->isActiveWhen(fn (): bool => request()->is('admin*')),
+            //             NavigationItem::make()
+            //                 ->label('ALFA LAWSON HELPDESK')
+            //                 ->url('/alfaLawson')
+            //                 ->icon('heroicon-o-arrow-right-circle'),
+            //         ]),
+            // ])
             
             ->resources([
                 TicketResource::class,
@@ -123,6 +124,8 @@ class AdminPanelProvider extends PanelProvider
                 BackboneTicketStatsWidget::class,
                 TicketChartWidget::class,
                 BackboneTicketChartWidget::class,
+                            UserScoreChartWidget::class, // Tambahkan widget baru
+
             ])
             
             // Plugin registration

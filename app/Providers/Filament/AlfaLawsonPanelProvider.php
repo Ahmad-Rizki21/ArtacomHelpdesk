@@ -26,7 +26,7 @@ use Awcodes\FilamentStickyHeader\StickyHeaderPlugin;
 use Devonab\FilamentEasyFooter\EasyFooterPlugin;
 
 // Import resource AlfaLawson
-use App\Filament\AlfaLawson\Resources\CustomerResource;
+use App\Filament\AlfaLawson\Resources\TableRemoteResource;
 use Swis\Filament\Backgrounds\FilamentBackgroundsPlugin;
 
 class AlfaLawsonPanelProvider extends PanelProvider
@@ -63,7 +63,7 @@ class AlfaLawsonPanelProvider extends PanelProvider
             
             // Daftarkan resource secara eksplisit
             ->resources([
-                CustomerResource::class,
+                TableRemoteResource::class,
                 // Tambahkan resource lain di sini jika ada
                 // ProductResource::class,
                 // OrderResource::class,
@@ -108,7 +108,7 @@ class AlfaLawsonPanelProvider extends PanelProvider
                 DispatchServingFilamentEvent::class,
             ])
             ->plugins([
-                FilamentNordThemePlugin::make(),
+                // FilamentNordThemePlugin::make(),
                 FilamentBackgroundsPlugin::make()
                 ->showAttribution(false),
                 FilamentApexChartsPlugin::make(),

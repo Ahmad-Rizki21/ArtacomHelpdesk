@@ -7,6 +7,7 @@ return [
         'navigation_sort' => -1,
         'navigation_badge' => true,
         'navigation_group' => true,
+        'sub_navigation_position' => null,
         'is_globally_searchable' => false,
         'show_model_path' => true,
         'is_scoped_to_tenant' => true,
@@ -56,6 +57,7 @@ return [
         'widgets' => true,
         'resources' => true,
         'custom_permissions' => false,
+        // \App\Filament\Widgets\UserScoreChartWidget::class => 'view_user_score_chart',
     ],
 
     'generator' => [

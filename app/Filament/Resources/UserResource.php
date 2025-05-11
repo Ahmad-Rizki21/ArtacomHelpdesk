@@ -63,6 +63,11 @@ class UserResource extends Resource
                     ->badge()
                     ->separator(', ')
                     ->color('success'),
+                TextColumn::make('score')
+                    ->label('Skor')
+                    ->sortable()
+                    ->alignCenter()
+                    ->color(fn ($record) => $record->score >= 50 ? 'success' : 'warning'),
                 TextColumn::make('created_at')->label('Dibuat Pada')->dateTime(),
             ])
             ->filters([
@@ -79,30 +84,30 @@ class UserResource extends Resource
                 
                 // Khusus untuk mengelola role
                 Tables\Actions\Action::make('manageRoles')
-                ->label('Kelola Role')
-                ->color('success')
-                ->icon('heroicon-o-shield-check')
-                ->modalHeading(fn($record) => "Kelola Role untuk {$record->name}")
-                ->form([
-                    Forms\Components\Select::make('roles')
-                        ->label('Role')
-                        ->multiple()
-                        ->options(\Spatie\Permission\Models\Role::pluck('name', 'id'))
-                        ->default(function ($record) {
-                            return $record->roles->pluck('id')->toArray();
-                        })
-                        ->required(),
-                ])
-                ->action(function (array $data, User $record): void {
-                    $roleIds = $data['roles'] ?? [];
-                    $roles = \Spatie\Permission\Models\Role::whereIn('id', $roleIds)->get();
-                    $record->syncRoles($roles);
-                    
-                    Notification::make()
-                        ->title('Role berhasil diperbarui')
-                        ->success()
-                        ->send();
-                }),
+                    ->label('Kelola Role')
+                    ->color('success')
+                    ->icon('heroicon-o-shield-check')
+                    ->modalHeading(fn($record) => "Kelola Role untuk {$record->name}")
+                    ->form([
+                        Forms\Components\Select::make('roles')
+                            ->label('Role')
+                            ->multiple()
+                            ->options(\Spatie\Permission\Models\Role::pluck('name', 'id'))
+                            ->default(function ($record) {
+                                return $record->roles->pluck('id')->toArray();
+                            })
+                            ->required(),
+                    ])
+                    ->action(function (array $data, User $record): void {
+                        $roleIds = $data['roles'] ?? [];
+                        $roles = \Spatie\Permission\Models\Role::whereIn('id', $roleIds)->get();
+                        $record->syncRoles($roles);
+                        
+                        Notification::make()
+                            ->title('Role berhasil diperbarui')
+                            ->success()
+                            ->send();
+                    }),
             ])
             ->bulkActions([
                 Tables\Actions\DeleteBulkAction::make(),
