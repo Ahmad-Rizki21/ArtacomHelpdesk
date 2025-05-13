@@ -21,6 +21,7 @@ use IbrahimBougaoua\FilaProgress\Tables\Columns\ProgressBar;
 use Filament\Forms\Components\TextInput;
 use Filament\Tables\Filters\Filter;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
@@ -178,28 +179,28 @@ class TicketResource extends Resource
                         ->live(),
 
                     Forms\Components\FileUpload::make('evidance_paths')
-    ->label('Upload Evidence')
-    ->multiple()
-    ->acceptedFileTypes([
-        'image/*',
-        'video/*',
-        'application/pdf',
-        'application/msword',
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        'application/vnd.ms-excel',
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        'text/plain',
-    ])
-    ->maxSize(10240)
-    ->directory('evidances')
-    ->preserveFilenames()
-    ->enableDownload()
-    ->maxFiles(10)
-    ->afterStateUpdated(function ($state) {
-        Log::info('Uploaded Evidance Paths Before Save: ' . json_encode($state));
-    })
-    ->dehydrated(true) // Pastikan data disimpan ke database
-    ->helperText('Unggah beberapa bukti (gambar, video, atau dokumen). Maksimum 10MB per file.'),
+                ->label('Upload Evidence')
+                ->multiple()
+                ->acceptedFileTypes([
+                    'image/*',
+                    'video/*',
+                    'application/pdf',
+                    'application/msword',
+                    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                    'application/vnd.ms-excel',
+                    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                    'text/plain',
+                ])
+                ->maxSize(10240)
+                ->directory('evidances')
+                ->preserveFilenames()
+                ->enableDownload()
+                ->maxFiles(10)
+                ->afterStateUpdated(function ($state) {
+                    Log::info('Uploaded Evidance Paths Before Save: ' . json_encode($state));
+                })
+                ->dehydrated(true) // Pastikan data disimpan ke database
+                ->helperText('Unggah beberapa bukti (gambar, video, atau dokumen). Maksimum 10MB per file.'),
 
                     Grid::make(2)->schema([
                         Forms\Components\TextInput::make('pending_clock')
